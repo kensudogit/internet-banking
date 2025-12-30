@@ -1,0 +1,47 @@
+# Node modules
+node_modules/
+**/node_modules/
+
+# Build artifacts
+build/
+**/build/
+dist/
+**/dist/
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Git
+.git/
+.gitignore
+
+# Docker
+docker-compose.yml
+.dockerignore
+
+# Gradle
+.gradle/
+**/.gradle/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+

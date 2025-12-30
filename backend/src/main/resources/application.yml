@@ -1,0 +1,55 @@
+spring:
+  application:
+    name: internet-banking
+  datasource:
+    url: jdbc:postgresql://localhost:5432/internet_banking
+    username: postgres
+    password: password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  security:
+    user:
+      name: admin
+      password: admin
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+logging:
+  level:
+    com.banking.internetbanking: DEBUG
+    org.springframework.security: DEBUG
+    org.seasar.doma: DEBUG
+
+# JWT設定
+jwt:
+  secret: your-secret-key-here-make-it-very-long-and-secure-in-production
+  expiration: 86400000 # 24時間
+
+# セキュリティ設定
+security:
+  password:
+    encoder:
+      strength: 12
+  mfa:
+    enabled: true
+    issuer: InternetBanking
+
+# 管理機能
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized

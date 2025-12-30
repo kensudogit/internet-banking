@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "userId": 1,
+    "accountNumber": "1234-5678-9012",
+    "accountType": "SAVINGS",
+    "balance": 500000.00,
+    "currency": "JPY",
+    "status": "ACTIVE",
+    "interestRate": 0.0010
+  },
+  {
+    "id": 2,
+    "userId": 1,
+    "accountNumber": "8765-4321-0987",
+    "accountType": "FIXED_DEPOSIT",
+    "balance": 1000000.00,
+    "currency": "JPY",
+    "status": "ACTIVE",
+    "interestRate": 0.0050
+  }
+]
+

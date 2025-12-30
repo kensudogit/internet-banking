@@ -1,0 +1,48 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "build"
+      }
+    },
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
+    {
+      "src": "/favicon.ico",
+      "dest": "/favicon.ico"
+    },
+    {
+      "src": "/manifest.json",
+      "dest": "/manifest.json"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "env": {
+    "REACT_APP_API_URL": "/api",
+    "REACT_APP_ENV": "production",
+    "REACT_APP_ENABLE_MFA": "true",
+    "REACT_APP_ENABLE_LOAN_MANAGEMENT": "true",
+    "REACT_APP_ENABLE_FIXED_DEPOSIT": "true",
+    "VERCEL_PUBLIC": "true",
+    "VERCEL_PROTECTION_BYPASS": "true"
+  },
+  "public": true
+}

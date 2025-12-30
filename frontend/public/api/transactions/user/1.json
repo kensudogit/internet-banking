@@ -1,0 +1,39 @@
+[
+  {
+    "id": 1,
+    "fromAccountId": 1,
+    "toAccountId": 2,
+    "transactionType": "TRANSFER",
+    "amount": 50000.00,
+    "currency": "JPY",
+    "description": "給料振込",
+    "status": "COMPLETED",
+    "referenceNumber": "TXN001",
+    "transactionDate": "2024-01-15T10:00:00.000Z"
+  },
+  {
+    "id": 2,
+    "fromAccountId": 2,
+    "toAccountId": 1,
+    "transactionType": "TRANSFER",
+    "amount": 25000.00,
+    "currency": "JPY",
+    "description": "家賃支払い",
+    "status": "COMPLETED",
+    "referenceNumber": "TXN002",
+    "transactionDate": "2024-01-14T15:30:00.000Z"
+  },
+  {
+    "id": 3,
+    "fromAccountId": 1,
+    "toAccountId": null,
+    "transactionType": "DEPOSIT",
+    "amount": 100000.00,
+    "currency": "JPY",
+    "description": "現金入金",
+    "status": "COMPLETED",
+    "referenceNumber": "TXN003",
+    "transactionDate": "2024-01-13T09:15:00.000Z"
+  }
+]
+
