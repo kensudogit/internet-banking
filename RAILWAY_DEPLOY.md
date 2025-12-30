@@ -28,9 +28,14 @@
 
 **重要**: PostgreSQL サービスが先に起動していることを確認してください。バックエンドサービスは自動的に接続をリトライします（最大5回、各試行の間隔は3秒）。
 
+#### 方法1: ルートディレクトリを使用する場合（推奨）
+
 1. プロジェクト内で「+ New」をクリック
 2. 「GitHub Repo」を選択し、リポジトリを選択
-3. ルートディレクトリを `backend` に設定
+3. **「Settings」タブで以下を設定**：
+   - **「Root Directory」を `backend` に設定**（重要）
+   - 「Dockerfile Path」を `Dockerfile` に設定
+   - 「Start Command」を `java -jar app.jar` に設定
 4. 以下の環境変数を設定（「Variables」タブ）：
 
 ```env
@@ -61,16 +66,20 @@ LOGGING_LEVEL_COM_BANKING_INTERNETBANKING=INFO
 LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY=INFO
 ```
 
-5. 「Settings」タブで：
-   - **「Root Directory」を `backend` に設定**（重要：これによりビルドコンテキストが `backend` ディレクトリになります）
-   - 「Dockerfile Path」を `Dockerfile` に設定（ルートディレクトリが `backend` の場合、`Dockerfile` だけでOK）
+5. デプロイを開始（自動的に開始されます）
+
+#### 方法2: ルートディレクトリを設定しない場合
+
+1. プロジェクト内で「+ New」をクリック
+2. 「GitHub Repo」を選択し、リポジトリを選択
+3. **「Settings」タブで以下を設定**：
+   - 「Root Directory」は空のまま（プロジェクトルートを使用）
+   - 「Dockerfile Path」を `backend/Dockerfile` に設定
    - 「Start Command」を `java -jar app.jar` に設定
+4. 環境変数を設定（上記の方法1と同じ）
+5. デプロイを開始
 
-**重要**: 
-- ルートディレクトリを `backend` に設定しないと、`src` ディレクトリが見つからずビルドエラーが発生します。
-- `backend/railway.json` ファイルが存在することを確認してください（プロジェクトに含まれています）。
-
-6. デプロイを開始（自動的に開始されます）
+**推奨**: 方法1（ルートディレクトリを `backend` に設定）を使用することを推奨します。これにより、ビルドコンテキストが `backend` ディレクトリになり、`src` ディレクトリが正しく見つかります。
 
 ### 4. フロントエンドサービスのデプロイ
 
