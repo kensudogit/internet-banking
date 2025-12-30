@@ -47,6 +47,9 @@ SERVER_SERVLET_CONTEXT_PATH=/api
 # CORS設定（フロントエンドの公開URLをカンマ区切りで指定）
 CORS_ALLOWED_ORIGINS=https://your-frontend-domain.railway.app
 
+# データベース自動初期化（初回起動時のみ）
+APP_DATABASE_AUTO_INIT=true
+
 # セキュリティ設定
 SPRING_SECURITY_USER_NAME=admin
 SPRING_SECURITY_USER_PASSWORD=admin
@@ -129,14 +132,37 @@ CORS_ALLOWED_ORIGINS=https://[frontend-public-domain],https://[another-domain]
 
 ### 7. データベース初期化
 
-PostgreSQL サービスに接続して、スキーマとサンプルデータを投入：
+データベーススキーマの初期化には、以下の3つの方法があります：
+
+#### 方法1: 自動初期化（推奨）
+
+バックエンドサービスの環境変数に以下を追加：
+
+```env
+# データベース自動初期化を有効化
+APP_DATABASE_AUTO_INIT=true
+
+# または、Spring Bootの初期化機能を使用
+SPRING_SQL_INIT_MODE=always
+```
+
+アプリケーション起動時に自動的にスキーマが作成されます。
+
+#### 方法2: Railway PostgreSQL の初期化スクリプト
+
+1. PostgreSQL サービスの「Variables」タブを開く
+2. 「Raw Editor」をクリック
+3. `INIT_SQL` 環境変数に `backend/src/main/resources/init.sql` の内容を設定
+4. サービスを再起動
+
+#### 方法3: 手動実行
 
 1. PostgreSQL サービスの「Connect」タブで接続情報を確認
 2. ローカルから接続するか、Railway の PostgreSQL コンソールを使用
 3. `backend/src/main/resources/schema.sql` を実行
 4. `backend/src/main/resources/sample-data.sql` を実行（オプション）
 
-または、Railway の PostgreSQL サービスに `init.sql` を設定することもできます。
+**注意**: 方法1を使用する場合、初回起動時のみスキーマが作成されます。既存のテーブルがある場合はスキップされます。
 
 ## 環境変数の一覧
 
@@ -151,6 +177,8 @@ PostgreSQL サービスに接続して、スキーマとサンプルデータを
 | `SERVER_PORT` | サーバーポート（デフォルト: 8080） | ❌ |
 | `SERVER_SERVLET_CONTEXT_PATH` | コンテキストパス（デフォルト: /api） | ❌ |
 | `CORS_ALLOWED_ORIGINS` | 許可するCORSオリジン（カンマ区切り） | ❌ |
+| `APP_DATABASE_AUTO_INIT` | データベース自動初期化（デフォルト: false） | ❌ |
+| `SPRING_SQL_INIT_MODE` | Spring SQL初期化モード（always/never/embedded） | ❌ |
 | `SPRING_SECURITY_USER_NAME` | デフォルト管理者ユーザー名 | ❌ |
 | `SPRING_SECURITY_USER_PASSWORD` | デフォルト管理者パスワード | ❌ |
 
@@ -179,6 +207,14 @@ PostgreSQL サービスに接続して、スキーマとサンプルデータを
 
 - PostgreSQL サービスの環境変数を確認
 - 接続URLの形式が正しいか確認（`jdbc:postgresql://host:port/database`）
+- PostgreSQL サービスが正常に起動しているか確認（ログを確認）
+
+### データベーススキーマが作成されない
+
+- `APP_DATABASE_AUTO_INIT=true` が設定されているか確認
+- アプリケーションのログで初期化メッセージを確認
+- 手動でスキーマを実行する場合は、PostgreSQL サービスに接続して `schema.sql` を実行
+- テーブルが既に存在する場合は、初期化はスキップされます（正常な動作）
 
 ## セキュリティに関する注意事項
 
