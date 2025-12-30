@@ -148,6 +148,42 @@ PostgreSQL の起動が遅い場合、自動的にリトライが実行されま
 3. バックエンドが正常に起動しているか確認
 4. バックエンドのログでリクエストが届いているか確認
 
+## ヘルスチェックエンドポイント
+
+アプリケーション起動後、以下のエンドポイントでデータベースの状態を確認できます：
+
+- **ヘルスチェック**: `https://[backend-domain]/api/actuator/health`
+- **詳細情報**: `https://[backend-domain]/api/actuator/info`
+
+ヘルスチェックエンドポイントのレスポンス例：
+
+```json
+{
+  "status": "UP",
+  "components": {
+    "db": {
+      "status": "UP",
+      "details": {
+        "database": "PostgreSQL",
+        "validationQuery": "isValid()"
+      }
+    },
+    "postgreSQLStatusChecker": {
+      "status": "UP",
+      "details": {
+        "database": "internet_banking",
+        "version": "PostgreSQL 17.7...",
+        "active_connections": 2,
+        "total_connections": 2,
+        "max_connections": 100,
+        "table_count": 6,
+        "database_size": "8.5 MB"
+      }
+    }
+  }
+}
+```
+
 ## ログレベルの調整
 
 問題の特定が難しい場合は、ログレベルを調整してより詳細な情報を取得できます。

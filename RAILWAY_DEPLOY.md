@@ -228,6 +228,31 @@ SPRING_SQL_INIT_MODE=always
 3. **HTTPS**: Railway は自動的にHTTPSを提供します
 4. **CORS**: 本番環境では適切なCORS設定を行ってください
 
+## ヘルスチェックとモニタリング
+
+### ヘルスチェックエンドポイント
+
+アプリケーション起動後、以下のエンドポイントでデータベースの状態を確認できます：
+
+- **ヘルスチェック**: `https://[backend-domain]/api/actuator/health`
+- **詳細情報**: `https://[backend-domain]/api/actuator/info`
+
+ヘルスチェックエンドポイントのレスポンスには、以下の情報が含まれます：
+- データベース接続状態
+- PostgreSQL バージョン情報
+- アクティブ接続数
+- テーブル数
+- データベースサイズ
+
+### ログの確認
+
+- **PostgreSQL ログ**: Railway Dashboard の PostgreSQL サービス → Logs
+- **バックエンドログ**: Railway Dashboard のバックエンドサービス → Logs
+
+正常な起動時は、以下のメッセージが表示されます：
+- PostgreSQL: `database system is ready to accept connections`
+- バックエンド: `✓ データベース接続テスト成功`
+
 ## 参考リンク
 
 - [Railway Documentation](https://docs.railway.app/)
