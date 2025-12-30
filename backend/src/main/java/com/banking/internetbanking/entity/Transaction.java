@@ -17,37 +17,41 @@ public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private final Long id;
+    private Long id;
 
     @Column(name = "from_account_id")
-    private final Long fromAccountId;
+    private Long fromAccountId;
 
     @Column(name = "to_account_id")
-    private final Long toAccountId;
+    private Long toAccountId;
 
     @Column(name = "transaction_type")
-    private final String transactionType; // TRANSFER, DEPOSIT, WITHDRAWAL, PAYMENT
+    private String transactionType; // TRANSFER, DEPOSIT, WITHDRAWAL, PAYMENT
 
     @Column(name = "amount")
-    private final BigDecimal amount;
+    private BigDecimal amount;
 
     @Column(name = "currency")
-    private final String currency;
+    private String currency;
 
     @Column(name = "description")
-    private final String description;
+    private String description;
 
     @Column(name = "status")
-    private final String status; // PENDING, COMPLETED, FAILED, CANCELLED
+    private String status; // PENDING, COMPLETED, FAILED, CANCELLED
 
     @Column(name = "reference_number")
-    private final String referenceNumber;
+    private String referenceNumber;
 
     @Column(name = "transaction_date")
-    private final LocalDateTime transactionDate;
+    private LocalDateTime transactionDate;
 
     @Column(name = "created_at")
-    private final LocalDateTime createdAt;
+    private LocalDateTime createdAt;
+
+    // JPA用のデフォルトコンストラクタ（Hibernateがエンティティをインスタンス化するために必要）
+    protected Transaction() {
+    }
 
     public Transaction(Long id, Long fromAccountId, Long toAccountId, String transactionType,
             BigDecimal amount, String currency, String description, String status,

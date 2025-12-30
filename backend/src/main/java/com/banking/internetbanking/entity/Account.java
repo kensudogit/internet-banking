@@ -17,34 +17,38 @@ public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private final Long id;
+    private Long id;
 
     @Column(name = "user_id")
-    private final Long userId;
+    private Long userId;
 
     @Column(name = "account_number")
-    private final String accountNumber;
+    private String accountNumber;
 
     @Column(name = "account_type")
-    private final String accountType; // SAVINGS, CHECKING, FIXED_DEPOSIT
+    private String accountType; // SAVINGS, CHECKING, FIXED_DEPOSIT
 
     @Column(name = "balance")
-    private final BigDecimal balance;
+    private BigDecimal balance;
 
     @Column(name = "currency")
-    private final String currency;
+    private String currency;
 
     @Column(name = "status")
-    private final String status; // ACTIVE, SUSPENDED, CLOSED
+    private String status; // ACTIVE, SUSPENDED, CLOSED
 
     @Column(name = "interest_rate")
-    private final BigDecimal interestRate;
+    private BigDecimal interestRate;
 
     @Column(name = "created_at")
-    private final LocalDateTime createdAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
-    private final LocalDateTime updatedAt;
+    private LocalDateTime updatedAt;
+
+    // JPA用のデフォルトコンストラクタ（Hibernateがエンティティをインスタンス化するために必要）
+    protected Account() {
+    }
 
     public Account(Long id, Long userId, String accountNumber, String accountType,
             BigDecimal balance, String currency, String status,

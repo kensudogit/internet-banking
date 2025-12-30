@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { apiService } from '../services/api';
 
 const Register: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -24,25 +25,60 @@ const Register: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('=== 登録フォーム送信開始 ===');
+    console.log('Form data:', formData);
+    
     setLoading(true);
     setError('');
 
+    // パスワード確認
     if (formData.password !== formData.confirmPassword) {
+      console.log('パスワード不一致');
       setError('パスワードが一致しません');
       setLoading(false);
       return;
     }
 
-    // 認証チェックを無効化 - モック登録
-    if (formData.username && formData.email && formData.password && formData.firstName && formData.lastName && formData.phoneNumber) {
+    // 必須項目チェック
+    if (!formData.username || !formData.email || !formData.password || !formData.firstName || !formData.lastName) {
+      console.log('必須項目不足');
+      setError('すべての必須項目を入力してください');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      console.log('API呼び出しを開始します...');
+      const registerData = {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phoneNumber: formData.phoneNumber || undefined,
+      };
+      console.log('送信データ:', registerData);
+      
+      // バックエンドAPIに登録リクエストを送信
+      const result = await apiService.register(registerData);
+      console.log('登録成功:', result);
+
       // 登録成功
       setError('');
+      alert('登録が完了しました。ログインページに移動します。');
       navigate('/login');
-    } else {
-      setError('すべての項目を入力してください');
+    } catch (err: any) {
+      console.error('Registration error:', err);
+      console.error('Error details:', {
+        message: err.message,
+        stack: err.stack,
+        name: err.name
+      });
+      setError(err.message || '登録に失敗しました。もう一度お試しください。');
+    } finally {
+      setLoading(false);
+      console.log('=== 登録フォーム送信終了 ===');
     }
-    
-    setLoading(false);
   };
 
   return (

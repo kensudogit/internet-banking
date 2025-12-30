@@ -16,46 +16,50 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private final Long id;
+    private Long id;
 
     @Column(name = "username")
-    private final String username;
+    private String username;
 
     @Column(name = "email")
-    private final String email;
+    private String email;
 
     @Column(name = "password_hash")
-    private final String passwordHash;
+    private String passwordHash;
 
     @Column(name = "first_name")
-    private final String firstName;
+    private String firstName;
 
     @Column(name = "last_name")
-    private final String lastName;
+    private String lastName;
 
     @Column(name = "phone_number")
-    private final String phoneNumber;
+    private String phoneNumber;
 
     @Column(name = "is_enabled")
-    private final boolean enabled;
+    private boolean enabled;
 
     @Column(name = "is_locked")
-    private final boolean locked;
+    private boolean locked;
 
     @Column(name = "mfa_enabled")
-    private final boolean mfaEnabled;
+    private boolean mfaEnabled;
 
     @Column(name = "mfa_secret")
-    private final String mfaSecret;
+    private String mfaSecret;
 
     @Column(name = "last_login")
-    private final LocalDateTime lastLogin;
+    private LocalDateTime lastLogin;
 
     @Column(name = "created_at")
-    private final LocalDateTime createdAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
-    private final LocalDateTime updatedAt;
+    private LocalDateTime updatedAt;
+
+    // JPA用のデフォルトコンストラクタ（Hibernateがエンティティをインスタンス化するために必要）
+    protected User() {
+    }
 
     public User(Long id, String username, String email, String passwordHash,
             String firstName, String lastName, String phoneNumber,

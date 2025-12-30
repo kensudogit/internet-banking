@@ -22,34 +22,44 @@ const Login: React.FC = () => {
     setLoading(true);
     setError('');
 
-    // 認証チェックを無効化 - モック認証
-    if (formData.username === 'admin' && formData.password === 'password123') {
-      // ログイン成功
-      localStorage.setItem('token', 'mock-jwt-token-admin');
-      localStorage.setItem('user', JSON.stringify({
-        id: 2,
-        username: 'admin',
-        email: 'admin@example.com',
-        firstName: '管理者',
-        lastName: 'システム'
-      }));
-      navigate('/dashboard');
-    } else if (formData.username === 'testuser' && formData.password === 'password123') {
-      // ログイン成功
-      localStorage.setItem('token', 'mock-jwt-token-testuser');
-      localStorage.setItem('user', JSON.stringify({
-        id: 1,
-        username: 'testuser',
-        email: 'test@example.com',
-        firstName: '太郎',
-        lastName: '田中'
-      }));
-      navigate('/dashboard');
-    } else {
-      setError('ユーザー名またはパスワードが正しくありません');
+    // 必須項目チェック
+    if (!formData.username || !formData.password) {
+      setError('ユーザー名とパスワードを入力してください');
+      setLoading(false);
+      return;
     }
-    
-    setLoading(false);
+
+    try {
+      // APIサービスをインポート
+      const { apiService } = await import('../services/api');
+      
+      // バックエンドAPIにログインリクエストを送信
+      const response = await apiService.login({
+        username: formData.username,
+        password: formData.password,
+      });
+
+      // ログイン成功
+      // TODO: JWTトークンが返ってきたら、それを保存する
+      if (response.token) {
+        localStorage.setItem('token', response.token);
+      } else {
+        // トークンがない場合は一時的なトークンを保存
+        localStorage.setItem('token', `token-${formData.username}-${Date.now()}`);
+      }
+      
+      // ユーザー情報を取得（後で実装）
+      localStorage.setItem('user', JSON.stringify({
+        username: formData.username,
+      }));
+
+      navigate('/dashboard');
+    } catch (err: any) {
+      console.error('Login error:', err);
+      setError(err.message || 'ログインに失敗しました。ユーザー名とパスワードを確認してください。');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
