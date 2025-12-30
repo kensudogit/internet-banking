@@ -111,13 +111,37 @@ PostgreSQL の起動が遅い場合、自動的にリトライが実行されま
 - ビルドログに `Dockerfile 'Dockerfile' does not exist` が表示される
 - デプロイが開始できない
 
+**確認事項（順番に確認してください）:**
+
+#### ステップ1: リポジトリの確認
+1. GitHub リポジトリで `backend/Dockerfile` が存在することを確認
+2. ファイルがコミットされていることを確認（`.gitignore` で除外されていないか）
+3. 正しいブランチ（通常は `main`）にコミットされていることを確認
+
+#### ステップ2: Railway設定の確認
+1. Railway Dashboard でバックエンドサービスを選択
+2. 「Settings」タブ → 右側のサイドバーで「**Source**」をクリック
+3. **「Root Directory」が `backend` に設定されているか確認**（重要）
+4. 「Settings」タブに戻る
+5. **「Dockerfile Path」が `Dockerfile` に設定されているか確認**（`backend/Dockerfile` ではない）
+6. 設定を保存
+
+#### ステップ3: リポジトリの再接続
+1. 「Settings」タブ → 「Source」セクション
+2. 「Disconnect」ボタンをクリック
+3. 再度「Edit」をクリックしてリポジトリを再接続
+4. ブランチが `main` に設定されていることを確認
+5. 再デプロイ
+
 **解決方法（方法1: ルートディレクトリを使用する場合）:**
 1. `backend/railway.json` ファイルが存在することを確認
 2. Railway Dashboard でバックエンドサービスを選択
 3. 「Settings」タブを開く
-4. **「Root Directory」が `backend` に設定されているか確認**（重要）
-5. 「Dockerfile Path」が `Dockerfile` に設定されているか確認
-6. 設定を保存して再デプロイ
+4. 右側のサイドバーで「**Source**」をクリック
+5. **「Root Directory」が `backend` に設定されているか確認**（重要）
+6. 「Settings」タブに戻る
+7. 「Dockerfile Path」が `Dockerfile` に設定されているか確認
+8. 設定を保存して再デプロイ
 
 **解決方法（方法2: ルートディレクトリを設定しない場合）:**
 1. Railway Dashboard でバックエンドサービスを選択
