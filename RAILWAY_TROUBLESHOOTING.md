@@ -157,7 +157,30 @@ PostgreSQL の起動が遅い場合、自動的にリトライが実行されま
 
 **推奨**: 方法1（ルートディレクトリを `backend` に設定）を使用することを推奨します。
 
-### 3. PostgreSQL が起動しない
+### 3. JARファイルが見つからないエラー
+
+**症状:**
+- ビルドログに `"/app/build/libs/backend-0.0.1-SNAPSHOT.jar": not found` が表示される
+- Dockerビルドが失敗する
+- Railwayでのデプロイが繰り返し失敗する
+
+**原因**: 
+- Spring Bootの`build`タスクだけでは、実行可能なJARファイル（bootJar）が生成されない場合があります
+- Dockerfileで`bootJar`タスクを明示的に実行する必要があります
+
+**解決方法:**
+1. `backend/Dockerfile`を確認
+2. ビルドコマンドが `./gradlew clean bootJar -x test --no-daemon` になっているか確認
+3. `build.gradle.kts`に以下が追加されているか確認：
+   ```kotlin
+   tasks.named("build") {
+       dependsOn("bootJar")
+   }
+   ```
+
+**修正済み**: プロジェクトのDockerfileとbuild.gradle.ktsは既に修正されています。
+
+### 4. PostgreSQL が起動しない
 
 **症状:**
 - ログに `database system is ready to accept connections` が表示されない

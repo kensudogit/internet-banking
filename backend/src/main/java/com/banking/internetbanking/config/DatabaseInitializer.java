@@ -143,11 +143,11 @@ public class DatabaseInitializer implements CommandLineRunner {
                     String sampleDataSql = StreamUtils.copyToString(sampleDataResource.getInputStream(),
                             StandardCharsets.UTF_8);
 
-                    String[] rawStatements = sampleDataSql.split(";");
+                    String[] sampleRawStatements = sampleDataSql.split(";");
                     int dataExecutedCount = 0;
                     int dataSkippedCount = 0;
 
-                    for (String rawStatement : rawStatements) {
+                    for (String rawStatement : sampleRawStatements) {
                         String statement = rawStatement.trim();
 
                         if (statement.isEmpty() ||

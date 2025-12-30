@@ -63,6 +63,21 @@ tasks.withType<KotlinCompile> {
     }
 }
 
-tasks.withType<Test> {
-    useJUnitPlatform()
+// bootJarタスクの設定（確実に実行可能JARを生成）
+tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
+    enabled = true
+    // ベース名を設定（これにより backend-0.0.1-SNAPSHOT.jar が生成される）
+    archiveBaseName.set("backend")
+    // クラスファイラーを空にして、通常のJARファイル名にする
+    archiveClassifier.set("")
+}
+
+// buildタスクが確実にbootJarを実行するように設定
+tasks.named("build") {
+    dependsOn("bootJar")
+}
+
+// jarタスクを無効化（bootJarのみを使用）
+tasks.named("jar") {
+    enabled = false
 }

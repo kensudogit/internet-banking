@@ -59,7 +59,28 @@
 
 ## それでも解決しない場合
 
+### 最も可能性が高い原因: GitHubリポジトリにDockerfileがコミットされていない
+
+**確認方法:**
+1. GitHubで `https://github.com/kensudogit/internet-banking` を開く
+2. `backend` ディレクトリをクリック
+3. `Dockerfile` ファイルが表示されるか確認
+
+**解決方法:**
+```bash
+cd C:\devlop\internet-banking
+git add backend/Dockerfile
+git add backend/railway.json
+git add backend/.dockerignore
+git commit -m "Add Dockerfile and Railway configuration"
+git push origin main
+```
+
+詳細は [GITHUB_COMMIT_CHECK.md](./GITHUB_COMMIT_CHECK.md) を参照してください。
+
+### その他の対処方法
+
 1. Railway のログを確認して、実際のエラーメッセージを確認
-2. GitHub リポジトリで `backend/Dockerfile` が正しく存在することを確認
-3. 新しいサービスを作成して、最初から設定し直す
+2. 新しいサービスを作成して、最初から設定し直す
+3. Root Directoryを空にして、Dockerfile Pathを `backend/Dockerfile` に設定する方法を試す
 
