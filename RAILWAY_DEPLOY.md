@@ -33,7 +33,9 @@
 1. プロジェクト内で「+ New」をクリック
 2. 「GitHub Repo」を選択し、リポジトリを選択
 3. **「Settings」タブで以下を設定**：
-   - **「Root Directory」を `backend` に設定**（重要）
+   - 右側のサイドバーで「**Source**」をクリック
+   - **「Root Directory」を `backend` に設定**（重要：これがないとDockerfileが見つかりません）
+   - 「Settings」タブに戻る
    - 「Dockerfile Path」を `Dockerfile` に設定
    - 「Start Command」を `java -jar app.jar` に設定
 4. 以下の環境変数を設定（「Variables」タブ）：
