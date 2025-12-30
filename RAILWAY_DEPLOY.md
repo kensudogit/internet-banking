@@ -208,6 +208,9 @@ SPRING_SQL_INIT_MODE=always
 - PostgreSQL サービスの環境変数を確認
 - 接続URLの形式が正しいか確認（`jdbc:postgresql://host:port/database`）
 - PostgreSQL サービスが正常に起動しているか確認（ログを確認）
+- バックエンドサービスのログで「データベース接続ヘルスチェック」のメッセージを確認
+- ログに「database system is ready to accept connections」が表示されていることを確認
+- アプリケーション起動時に「データベース接続が正常です」が表示されることを確認
 
 ### データベーススキーマが作成されない
 

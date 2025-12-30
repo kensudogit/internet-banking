@@ -34,8 +34,11 @@ server:
 logging:
   level:
     com.banking.internetbanking: DEBUG
+    com.banking.internetbanking.config: INFO
     org.springframework.security: DEBUG
     org.seasar.doma: DEBUG
+    org.springframework.jdbc: INFO
+    org.springframework.boot.autoconfigure.jdbc: INFO
 
 # JWT設定
 jwt:
