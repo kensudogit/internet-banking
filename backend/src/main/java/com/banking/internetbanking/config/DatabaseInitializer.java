@@ -40,10 +40,37 @@ public class DatabaseInitializer implements CommandLineRunner {
         }
 
         try {
-            // データベース接続の確認
+            // データベース接続の確認（リトライ付き）
             logger.info("データベース接続を確認しています...");
-            jdbcTemplate.execute("SELECT 1");
-            logger.info("データベース接続が正常です。");
+            int maxConnectionRetries = 5;
+            long retryDelayMs = 2000;
+            boolean connectionEstablished = false;
+
+            for (int attempt = 1; attempt <= maxConnectionRetries; attempt++) {
+                try {
+                    jdbcTemplate.execute("SELECT 1");
+                    logger.info("データベース接続が正常です。");
+                    connectionEstablished = true;
+                    break;
+                } catch (Exception e) {
+                    logger.warn("接続確認試行 {}/{} 失敗: {}", attempt, maxConnectionRetries, e.getMessage());
+                    if (attempt < maxConnectionRetries) {
+                        logger.info("{}秒後に再試行します...", retryDelayMs / 1000);
+                        try {
+                            Thread.sleep(retryDelayMs);
+                        } catch (InterruptedException ie) {
+                            Thread.currentThread().interrupt();
+                            logger.error("リトライ待機中に割り込みが発生しました", ie);
+                            return;
+                        }
+                    }
+                }
+            }
+
+            if (!connectionEstablished) {
+                logger.error("データベース接続を確立できませんでした。スキーマ初期化をスキップします。");
+                return;
+            }
 
             // テーブルが存在するか確認
             String checkTableQuery = "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'users'";
