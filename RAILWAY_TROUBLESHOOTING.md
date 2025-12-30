@@ -16,6 +16,8 @@
 
 **注意**: ログに `[err]` タグが付いている行が多数表示されますが、これらは OpenSSL の証明書生成時の出力であり、エラーではありません。実際のエラーは `ERROR` や `FATAL` というキーワードが含まれます。
 
+詳細なログ解釈方法については [POSTGRESQL_LOG_GUIDE.md](./POSTGRESQL_LOG_GUIDE.md) を参照してください。
+
 ### バックエンドサービスのログ
 
 1. Railway Dashboard でバックエンドサービスを選択
