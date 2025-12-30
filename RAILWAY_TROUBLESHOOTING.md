@@ -9,9 +9,12 @@
 1. Railway Dashboard で PostgreSQL サービスを選択
 2. 「Logs」タブを開く
 3. 以下のメッセージを確認：
-   - `database system is ready to accept connections` - 正常に起動
-   - `CREATE DATABASE` - データベース作成成功
-   - エラーメッセージがないか確認
+   - `database system is ready to accept connections` - 正常に起動 ✅
+   - `CREATE DATABASE` - データベース作成成功 ✅
+   - `PostgreSQL init process complete; ready for start up.` - 初期化完了 ✅
+   - `checkpoint complete` - チェックポイント正常 ✅
+
+**注意**: ログに `[err]` タグが付いている行が多数表示されますが、これらは OpenSSL の証明書生成時の出力であり、エラーではありません。実際のエラーは `ERROR` や `FATAL` というキーワードが含まれます。
 
 ### バックエンドサービスのログ
 
@@ -42,6 +45,27 @@
 データベース接続を確認しています...
 データベース接続が正常です。
 データベーススキーマの初期化が完了しました。実行: 15, スキップ: 0
+
+=== データベース起動検証開始 ===
+1. データベース接続の確認...
+   ✓ PostgreSQL バージョン: PostgreSQL 17.7...
+2. 必須テーブルの存在確認...
+   ✓ テーブル 'users' が存在します (行数: 0)
+   ✓ テーブル 'accounts' が存在します (行数: 0)
+   ✓ テーブル 'transactions' が存在します (行数: 0)
+   ✓ テーブル 'fixed_deposits' が存在します (行数: 0)
+   ✓ テーブル 'loans' が存在します (行数: 0)
+   ✓ テーブル 'security_logs' が存在します (行数: 0)
+3. データベース設定の確認...
+   ✓ 現在のデータベース: internet_banking
+   ✓ 文字エンコーディング: UTF8
+   ✓ タイムゾーン: UTC
+   ✓ 最大接続数: 100
+4. 接続プールの状態確認...
+   ✓ アクティブ接続: 2
+   ✓ アイドル接続: 1
+   ✓ 合計接続: 3/100
+=== データベース起動検証完了: すべて正常 ===
 ```
 
 #### 接続リトライのログ例
