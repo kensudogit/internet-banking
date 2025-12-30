@@ -90,7 +90,38 @@ PostgreSQL の起動が遅い場合、自動的にリトライが実行されま
 
 ## よくある問題と解決方法
 
-### 1. PostgreSQL が起動しない
+### 1. Dockerビルドエラー: "/src": not found
+
+**症状:**
+- ビルドログに `ERROR: failed to build: failed to solve: failed to compute cache key: "/src": not found` が表示される
+- Dockerビルドが失敗する
+
+**解決方法:**
+1. Railway Dashboard でバックエンドサービスを選択
+2. 「Settings」タブを開く
+3. **「Root Directory」が `backend` に設定されているか確認**
+4. 設定されていない場合は、`backend` に設定して保存
+5. サービスを再デプロイ
+
+**原因**: ルートディレクトリが設定されていないと、ビルドコンテキストがプロジェクトルートになり、`backend/src` ディレクトリが見つからなくなります。
+
+### 2. Dockerfile が見つからないエラー
+
+**症状:**
+- ビルドログに `Dockerfile 'Dockerfile' does not exist` が表示される
+- デプロイが開始できない
+
+**解決方法:**
+1. `backend/railway.json` ファイルが存在することを確認
+2. Railway Dashboard でバックエンドサービスを選択
+3. 「Settings」タブを開く
+4. **「Root Directory」が `backend` に設定されているか確認**
+5. 「Dockerfile Path」が `Dockerfile` に設定されているか確認
+6. 設定を保存して再デプロイ
+
+**原因**: Railway はルートディレクトリ内で `railway.json` と `Dockerfile` を探します。ルートディレクトリが `backend` に設定されている場合、`backend/railway.json` と `backend/Dockerfile` が存在する必要があります。
+
+### 3. PostgreSQL が起動しない
 
 **症状:**
 - ログに `database system is ready to accept connections` が表示されない

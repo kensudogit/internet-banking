@@ -62,9 +62,13 @@ LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY=INFO
 ```
 
 5. 「Settings」タブで：
-   - 「Root Directory」を `backend` に設定
-   - 「Dockerfile Path」を `Dockerfile` に設定
+   - **「Root Directory」を `backend` に設定**（重要：これによりビルドコンテキストが `backend` ディレクトリになります）
+   - 「Dockerfile Path」を `Dockerfile` に設定（ルートディレクトリが `backend` の場合、`Dockerfile` だけでOK）
    - 「Start Command」を `java -jar app.jar` に設定
+
+**重要**: 
+- ルートディレクトリを `backend` に設定しないと、`src` ディレクトリが見つからずビルドエラーが発生します。
+- `backend/railway.json` ファイルが存在することを確認してください（プロジェクトに含まれています）。
 
 6. デプロイを開始（自動的に開始されます）
 
