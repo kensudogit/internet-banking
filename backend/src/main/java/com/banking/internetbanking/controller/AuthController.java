@@ -18,17 +18,18 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody Map<String, String> request) {
+    public ResponseEntity<?> register(@RequestBody Map<String, Object> request) {
         try {
             System.out.println("=== ユーザー登録リクエスト受信 ===");
             System.out.println("Request body: " + request);
+            System.out.println("Request body type: " + (request != null ? request.getClass().getName() : "null"));
 
-            String username = request.get("username");
-            String email = request.get("email");
-            String password = request.get("password");
-            String firstName = request.get("firstName");
-            String lastName = request.get("lastName");
-            String phoneNumber = request.get("phoneNumber");
+            String username = request.get("username") != null ? request.get("username").toString() : null;
+            String email = request.get("email") != null ? request.get("email").toString() : null;
+            String password = request.get("password") != null ? request.get("password").toString() : null;
+            String firstName = request.get("firstName") != null ? request.get("firstName").toString() : null;
+            String lastName = request.get("lastName") != null ? request.get("lastName").toString() : null;
+            String phoneNumber = request.get("phoneNumber") != null ? request.get("phoneNumber").toString() : null;
 
             System.out.println("Username: " + username);
             System.out.println("Email: " + email);
