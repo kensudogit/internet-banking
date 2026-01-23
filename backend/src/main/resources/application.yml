@@ -35,7 +35,7 @@ spring:
       password: admin
 
 server:
-  port: 8080
+  port: ${PORT:8080}
   # context-path を削除（コントローラーで /api プレフィックスを明示的に指定）
   # servlet:
   #   context-path: /api
