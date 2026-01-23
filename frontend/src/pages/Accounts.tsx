@@ -120,31 +120,31 @@ const Accounts: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* ヘッダーセクション */}
       <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">口座情報</h1>
-              <p className="text-gray-600 mt-2">お客様の口座一覧と詳細情報をご確認いただけます</p>
+              <h1 className="text-2xl font-bold text-gray-900">口座情報</h1>
+              <p className="text-gray-600 mt-1 text-sm">お客様の口座一覧と詳細情報をご確認いただけます</p>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
               <button
                 onClick={() => setShowBalance(!showBalance)}
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors duration-200 flex items-center"
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-md transition-colors duration-200 flex items-center text-sm"
               >
                 {showBalance ? (
                   <>
-                    <EyeSlashIcon className="h-4 w-4 mr-2" />
+                    <EyeSlashIcon className="h-3.5 w-3.5 mr-1.5" />
                     残高を隠す
                   </>
                 ) : (
                   <>
-                    <EyeIcon className="h-4 w-4 mr-2" />
+                    <EyeIcon className="h-3.5 w-3.5 mr-1.5" />
                     残高を表示
                   </>
                 )}
               </button>
-              <button className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center">
-                <PlusIcon className="h-4 w-4 mr-2" />
+              <button className="bg-primary-600 hover:bg-primary-700 text-white px-3 py-1.5 rounded-md transition-colors duration-200 flex items-center text-sm">
+                <PlusIcon className="h-3.5 w-3.5 mr-1.5" />
                 新規口座開設
               </button>
             </div>
@@ -152,25 +152,25 @@ const Accounts: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         {/* 総残高サマリー */}
-        <div className="bg-gradient-to-r from-primary-600 to-primary-700 rounded-2xl shadow-lg p-8 text-white mb-8">
+        <div className="bg-gradient-to-r from-primary-600 to-primary-700 rounded-xl shadow-lg p-4 text-white mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-semibold mb-2">総残高</h2>
-              <div className="text-4xl font-bold">
+              <h2 className="text-lg font-semibold mb-0.5">総残高</h2>
+              <div className="text-2xl font-bold">
                 {showBalance ? `¥${totalBalance.toLocaleString()}` : '¥***,***,***'}
               </div>
-              <p className="text-primary-100 mt-2">保有口座数: {accounts.length}件</p>
+              <p className="text-primary-100 mt-0.5 text-xs">保有口座数: {accounts.length}件</p>
             </div>
-            <div className="h-20 w-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-              <BanknotesIcon className="h-10 w-10 text-white" />
+            <div className="h-12 w-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+              <BanknotesIcon className="h-6 w-6 text-white" />
             </div>
           </div>
         </div>
 
         {/* 口座一覧 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {accounts.map((account) => {
             const IconComponent = getAccountTypeIcon(account.accountType);
             const colorClass = getAccountTypeColor(account.accountType);
@@ -178,45 +178,45 @@ const Accounts: React.FC = () => {
             return (
               <div
                 key={account.id}
-                className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
+                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
               >
                 {/* カードヘッダー */}
-                <div className={`bg-gradient-to-r ${colorClass} p-6 text-white`}>
+                <div className={`bg-gradient-to-r ${colorClass} p-4 text-white`}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <div className="h-12 w-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
-                        <IconComponent className="h-6 w-6 text-white" />
+                      <div className="h-10 w-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                        <IconComponent className="h-5 w-5 text-white" />
                       </div>
-                      <div className="ml-4">
-                        <h3 className="text-lg font-semibold">{getAccountTypeLabel(account.accountType)}</h3>
-                        <p className="text-primary-100 text-sm">{account.accountNumber}</p>
+                      <div className="ml-3">
+                        <h3 className="text-base font-semibold">{getAccountTypeLabel(account.accountType)}</h3>
+                        <p className="text-primary-100 text-xs">{account.accountNumber}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-sm text-primary-100">金利</div>
-                      <div className="text-lg font-bold">{(account.interestRate * 100).toFixed(2)}%</div>
+                      <div className="text-xs text-primary-100">金利</div>
+                      <div className="text-base font-bold">{(account.interestRate * 100).toFixed(2)}%</div>
                     </div>
                   </div>
                 </div>
 
                 {/* カードボディ */}
-                <div className="p-6">
-                  <div className="space-y-4">
+                <div className="p-4">
+                  <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-600">残高</span>
-                      <span className="text-2xl font-bold text-gray-900">
+                      <span className="text-xs text-gray-600">残高</span>
+                      <span className="text-xl font-bold text-gray-900">
                         {showBalance ? `¥${account.balance.toLocaleString()}` : '¥***,***,***'}
                       </span>
                     </div>
                     
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-600">通貨</span>
-                      <span className="text-gray-900 font-medium">{account.currency}</span>
+                      <span className="text-xs text-gray-600">通貨</span>
+                      <span className="text-sm text-gray-900 font-medium">{account.currency}</span>
                     </div>
                     
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-600">ステータス</span>
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      <span className="text-xs text-gray-600">ステータス</span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                         account.status === 'ACTIVE' 
                           ? 'bg-green-100 text-green-800' 
                           : 'bg-red-100 text-red-800'
@@ -227,11 +227,11 @@ const Accounts: React.FC = () => {
                   </div>
 
                   {/* アクションボタン */}
-                  <div className="mt-6 grid grid-cols-2 gap-3">
-                    <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors duration-200 text-sm">
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-1.5 px-3 rounded-md transition-colors duration-200 text-xs">
                       詳細を見る
                     </button>
-                    <button className="bg-primary-50 hover:bg-primary-100 text-primary-700 font-medium py-2 px-4 rounded-lg transition-colors duration-200 text-sm">
+                    <button className="bg-primary-50 hover:bg-primary-100 text-primary-700 font-medium py-1.5 px-3 rounded-md transition-colors duration-200 text-xs">
                       取引履歴
                     </button>
                   </div>
@@ -243,13 +243,13 @@ const Accounts: React.FC = () => {
 
         {/* 空の状態 */}
         {accounts.length === 0 && (
-          <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
-            <div className="mx-auto h-24 w-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-              <BanknotesIcon className="h-12 w-12 text-gray-400" />
+          <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+            <div className="mx-auto h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              <BanknotesIcon className="h-8 w-8 text-gray-400" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">口座がありません</h3>
-            <p className="text-gray-600 mb-6">新しい口座を開設して、インターネットバンキングを始めましょう</p>
-            <button className="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-1.5">口座がありません</h3>
+            <p className="text-sm text-gray-600 mb-4">新しい口座を開設して、インターネットバンキングを始めましょう</p>
+            <button className="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-5 rounded-md transition-colors duration-200 text-sm">
               口座を開設する
             </button>
           </div>
@@ -257,31 +257,31 @@ const Accounts: React.FC = () => {
 
         {/* 口座開設のメリット */}
         {accounts.length > 0 && (
-          <div className="mt-8 bg-white rounded-2xl shadow-lg p-8">
-            <h3 className="text-xl font-semibold text-gray-900 mb-6">口座開設のメリット</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="mt-6 bg-white rounded-xl shadow-lg p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">口座開設のメリット</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="text-center">
-                <div className="mx-auto h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                  <BanknotesIcon className="h-8 w-8 text-blue-600" />
+                <div className="mx-auto h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center mb-3">
+                  <BanknotesIcon className="h-6 w-6 text-blue-600" />
                 </div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-2">高金利</h4>
-                <p className="text-gray-600">通常の預金より高い金利で資産を増やせます</p>
+                <h4 className="text-base font-semibold text-gray-900 mb-1.5">高金利</h4>
+                <p className="text-xs text-gray-600">通常の預金より高い金利で資産を増やせます</p>
               </div>
               
               <div className="text-center">
-                <div className="mx-auto h-16 w-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                  <CreditCardIcon className="h-8 w-8 text-green-600" />
+                <div className="mx-auto h-12 w-12 bg-green-100 rounded-full flex items-center justify-center mb-3">
+                  <CreditCardIcon className="h-6 w-6 text-green-600" />
                 </div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-2">便利なサービス</h4>
-                <p className="text-gray-600">振込や投資など、豊富なサービスを利用できます</p>
+                <h4 className="text-base font-semibold text-gray-900 mb-1.5">便利なサービス</h4>
+                <p className="text-xs text-gray-600">振込や投資など、豊富なサービスを利用できます</p>
               </div>
               
               <div className="text-center">
-                <div className="mx-auto h-16 w-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
-                  <ChartBarIcon className="h-8 w-8 text-purple-600" />
+                <div className="mx-auto h-12 w-12 bg-purple-100 rounded-full flex items-center justify-center mb-3">
+                  <ChartBarIcon className="h-6 w-6 text-purple-600" />
                 </div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-2">資産管理</h4>
-                <p className="text-gray-600">一元管理で資産状況を把握しやすくなります</p>
+                <h4 className="text-base font-semibold text-gray-900 mb-1.5">資産管理</h4>
+                <p className="text-xs text-gray-600">一元管理で資産状況を把握しやすくなります</p>
               </div>
             </div>
           </div>

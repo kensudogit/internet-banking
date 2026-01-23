@@ -45,6 +45,18 @@ export interface Transaction {
   transactionDate: string;
 }
 
+export interface Investment {
+  id: number;
+  userId: number;
+  accountId: number;
+  investmentType: string;
+  productName: string;
+  amount: number;
+  currentValue: number;
+  purchaseDate: string;
+  status: string;
+}
+
 export interface RegisterRequest {
   username: string;
   email: string;
@@ -193,6 +205,99 @@ export const apiService = {
       // APIが利用できない場合、モックAPIにフォールバック
       console.log('Falling back to mock API for transactions');
       return mockApiService.getTransactions(userId);
+    }
+  },
+
+  // 投資情報を取得
+  async getInvestments(userId: number): Promise<Investment[]> {
+    try {
+      const url = `${API_BASE_URL}/investments/user/${userId}`;
+      console.log('Fetching investments from:', url);
+      
+      const response = await fetch(url);
+      console.log('Investments response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Investments API error response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      }
+      
+      const data = await response.json();
+      console.log('Investments data received:', data);
+      return data;
+    } catch (error) {
+      console.error('Error fetching investments:', error);
+      return [];
+    }
+  },
+
+  // 振込を実行
+  async createTransfer(fromAccountId: number, toAccountId: number, amount: number, description?: string): Promise<Transaction> {
+    try {
+      const url = `${API_BASE_URL}/transactions/transfer`;
+      console.log('Creating transfer:', url);
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fromAccountId,
+          toAccountId,
+          amount,
+          currency: 'JPY',
+          description: description || '振込',
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Transfer API error response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      }
+      
+      const data = await response.json();
+      console.log('Transfer created:', data);
+      return data;
+    } catch (error) {
+      console.error('Error creating transfer:', error);
+      throw error;
+    }
+  },
+
+  // 口座を作成
+  async createAccount(userId: number, accountType: string, currency: string, interestRate: number): Promise<Account> {
+    try {
+      const url = `${API_BASE_URL}/accounts`;
+      console.log('Creating account:', url);
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          accountType,
+          currency,
+          interestRate,
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Create account API error response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      }
+      
+      const data = await response.json();
+      console.log('Account created:', data);
+      return data;
+    } catch (error) {
+      console.error('Error creating account:', error);
+      throw error;
     }
   }
 };

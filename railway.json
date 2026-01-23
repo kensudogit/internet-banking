@@ -8,6 +8,7 @@
     "startCommand": "java -jar app.jar",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
-  }
+  },
+  "note": "この設定ファイルはルートディレクトリ用です。Railway Dashboard で各サービス（バックエンド、フロントエンド）の Root Directory を設定してください。"
 }
 

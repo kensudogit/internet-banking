@@ -10,6 +10,7 @@ const Navbar: React.FC = () => {
     { name: '口座情報', href: '/accounts' },
     { name: '取引履歴', href: '/transactions' },
     { name: '振込', href: '/transfer' },
+    { name: '投資', href: '/investments' },
     { name: 'サービス', href: '/services' },
   ];
 

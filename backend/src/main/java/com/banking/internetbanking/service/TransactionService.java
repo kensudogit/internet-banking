@@ -10,15 +10,18 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class TransactionService {
 
     private final TransactionRepository transactionRepository;
+    private final AccountService accountService;
 
-    public TransactionService(TransactionRepository transactionRepository) {
+    public TransactionService(TransactionRepository transactionRepository, AccountService accountService) {
         this.transactionRepository = transactionRepository;
+        this.accountService = accountService;
     }
 
     public List<Transaction> getAllTransactions() {
@@ -34,7 +37,20 @@ public class TransactionService {
     }
 
     public List<Transaction> getTransactionsByUserId(Long userId) {
-        return transactionRepository.findByFromAccountIdOrToAccountId(userId, userId);
+        // ユーザーIDから口座IDのリストを取得
+        List<Long> accountIds = accountService.getAccountsByUserId(userId).stream()
+                .map(account -> account.getId())
+                .collect(Collectors.toList());
+
+        // ユーザーの口座に関連する取引を取得
+        return transactionRepository.findAll().stream()
+                .filter(t -> {
+                    Long fromAccountId = t.getFromAccountId();
+                    Long toAccountId = t.getToAccountId();
+                    return (fromAccountId != null && accountIds.contains(fromAccountId)) ||
+                            (toAccountId != null && accountIds.contains(toAccountId));
+                })
+                .collect(Collectors.toList());
     }
 
     public List<Transaction> getTransactionsByDateRange(Long accountId, LocalDateTime startDate,

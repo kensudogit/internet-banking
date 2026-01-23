@@ -78,6 +78,21 @@ CREATE TABLE loans (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 投資情報テーブル
+CREATE TABLE investments (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(id),
+    account_id BIGINT NOT NULL REFERENCES accounts(id),
+    investment_type VARCHAR(50) NOT NULL, -- MUTUAL_FUND, STOCK, BOND, ETF
+    product_name VARCHAR(200) NOT NULL,
+    amount DECIMAL(15,2) NOT NULL,
+    current_value DECIMAL(15,2) NOT NULL,
+    purchase_date DATE NOT NULL,
+    status VARCHAR(20) DEFAULT 'ACTIVE', -- ACTIVE, SOLD, MATURED
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- セキュリティログテーブル
 CREATE TABLE security_logs (
     id BIGSERIAL PRIMARY KEY,
@@ -100,6 +115,8 @@ CREATE INDEX idx_transactions_transaction_date ON transactions(transaction_date)
 CREATE INDEX idx_transactions_reference_number ON transactions(reference_number);
 CREATE INDEX idx_fixed_deposits_account_id ON fixed_deposits(account_id);
 CREATE INDEX idx_loans_user_id ON loans(user_id);
+CREATE INDEX idx_investments_user_id ON investments(user_id);
+CREATE INDEX idx_investments_account_id ON investments(account_id);
 CREATE INDEX idx_security_logs_user_id ON security_logs(user_id);
 CREATE INDEX idx_security_logs_created_at ON security_logs(created_at);
 

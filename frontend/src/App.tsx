@@ -10,6 +10,7 @@ import Accounts from './pages/Accounts';
 import Transactions from './pages/Transactions';
 import Transfer from './pages/Transfer';
 import Services from './pages/Services';
+import Investments from './pages/Investments';
 import './App.css';
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const MainContent: React.FC = () => {
         <Route path="/accounts" element={<Accounts />} />
         <Route path="/transactions" element={<Transactions />} />
         <Route path="/transfer" element={<Transfer />} />
+        <Route path="/investments" element={<Investments />} />
       </Routes>
     </main>
   );

@@ -106,6 +106,73 @@ const Transactions: React.FC = () => {
     }
   };
 
+  const exportToCSV = () => {
+    // CSVヘッダー
+    const headers = [
+      '取引日時',
+      '取引種別',
+      '説明',
+      '金額',
+      '通貨',
+      'ステータス',
+      '参照番号'
+    ];
+
+    // CSVデータ行を生成
+    const csvRows = [
+      headers.join(','),
+      ...sortedTransactions.map(transaction => {
+        const date = new Date(transaction.transactionDate).toLocaleString('ja-JP', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+        const type = getTransactionTypeLabel(transaction.transactionType);
+        const description = `"${transaction.description.replace(/"/g, '""')}"`; // CSV内のダブルクォートをエスケープ
+        const amount = transaction.transactionType === 'DEPOSIT' 
+          ? `+${transaction.amount}` 
+          : `-${transaction.amount}`;
+        const currency = transaction.currency;
+        const status = getStatusLabel(transaction.status);
+        const referenceNumber = transaction.referenceNumber;
+
+        return [
+          date,
+          type,
+          description,
+          amount,
+          currency,
+          status,
+          referenceNumber
+        ].join(',');
+      })
+    ];
+
+    // BOM付きUTF-8でCSVを作成（Excelで正しく表示されるように）
+    const csvContent = '\uFEFF' + csvRows.join('\n');
+
+    // Blobオブジェクトを作成
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+
+    // ファイル名を生成（現在の日時を含める）
+    const now = new Date();
+    const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+    const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, '');
+    link.download = `取引履歴_${dateStr}_${timeStr}.csv`;
+
+    // ダウンロードを実行
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  };
+
   const filteredTransactions = transactions.filter(transaction => {
     if (filterType === 'ALL') return true;
     return transaction.transactionType === filterType;
@@ -167,15 +234,19 @@ const Transactions: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* ヘッダーセクション */}
       <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">取引履歴</h1>
-              <p className="text-gray-600 mt-2">お客様の取引履歴と詳細情報をご確認いただけます</p>
+              <h1 className="text-2xl font-bold text-gray-900">取引履歴</h1>
+              <p className="text-gray-600 mt-1 text-sm">お客様の取引履歴と詳細情報をご確認いただけます</p>
             </div>
-            <div className="flex items-center space-x-4">
-              <button className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center">
-                <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
+            <div className="flex items-center space-x-2">
+              <button 
+                onClick={exportToCSV}
+                disabled={sortedTransactions.length === 0}
+                className="bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-3 py-1.5 rounded-md transition-colors duration-200 flex items-center text-sm"
+              >
+                <ArrowDownTrayIcon className="h-3.5 w-3.5 mr-1.5" />
                 CSV出力
               </button>
             </div>
@@ -183,67 +254,67 @@ const Transactions: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         {/* 統計カード */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           {/* 総取引数 */}
-          <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl shadow-lg p-6 text-white">
+          <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl shadow-lg p-4 text-white">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-blue-100 text-sm font-medium">総取引数</p>
-                <p className="text-3xl font-bold">{transactions.length}</p>
+                <p className="text-blue-100 text-xs font-medium mb-1">総取引数</p>
+                <p className="text-2xl font-bold">{transactions.length}</p>
               </div>
-              <div className="h-12 w-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                <ClockIcon className="h-6 w-6 text-white" />
+              <div className="h-10 w-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                <ClockIcon className="h-5 w-5 text-white" />
               </div>
             </div>
-            <div className="mt-4 text-blue-100 text-sm">
+            <div className="mt-2 text-blue-100 text-xs">
               過去30日間の取引
             </div>
           </div>
 
           {/* 総入金 */}
-          <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-2xl shadow-lg p-6 text-white">
+          <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-2xl shadow-lg p-4 text-white">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-green-100 text-sm font-medium">総入金</p>
-                <p className="text-3xl font-bold">¥{totalIncome.toLocaleString()}</p>
+                <p className="text-green-100 text-xs font-medium mb-1">総入金</p>
+                <p className="text-2xl font-bold">¥{totalIncome.toLocaleString()}</p>
               </div>
-              <div className="h-12 w-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                <ArrowTrendingDownIcon className="h-6 w-6 text-white" />
+              <div className="h-10 w-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                <ArrowTrendingDownIcon className="h-5 w-5 text-white" />
               </div>
             </div>
-            <div className="mt-4 text-green-100 text-sm">
+            <div className="mt-2 text-green-100 text-xs">
               入金取引の合計
             </div>
           </div>
 
           {/* 総出金 */}
-          <div className="bg-gradient-to-r from-red-500 to-red-600 rounded-2xl shadow-lg p-6 text-white">
+          <div className="bg-gradient-to-r from-red-500 to-red-600 rounded-2xl shadow-lg p-4 text-white">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-red-100 text-sm font-medium">総出金</p>
-                <p className="text-3xl font-bold">¥{totalExpense.toLocaleString()}</p>
+                <p className="text-red-100 text-xs font-medium mb-1">総出金</p>
+                <p className="text-2xl font-bold">¥{totalExpense.toLocaleString()}</p>
               </div>
-              <div className="h-12 w-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                <ArrowTrendingUpIcon className="h-6 w-6 text-white" />
+              <div className="h-10 w-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                <ArrowTrendingUpIcon className="h-5 w-5 text-white" />
               </div>
             </div>
-            <div className="mt-4 text-red-100 text-sm">
+            <div className="mt-2 text-red-100 text-xs">
               出金取引の合計
             </div>
           </div>
         </div>
 
         {/* フィルターとソート */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-            <div className="flex items-center space-x-4">
-              <label className="text-sm font-medium text-gray-700">取引種別:</label>
+        <div className="bg-white rounded-xl shadow-lg p-4 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+            <div className="flex items-center space-x-3">
+              <label className="text-xs font-medium text-gray-700">取引種別:</label>
               <select
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                className="border border-gray-300 rounded-md px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               >
                 <option value="ALL">すべて</option>
                 <option value="TRANSFER">振込</option>
@@ -253,12 +324,12 @@ const Transactions: React.FC = () => {
               </select>
             </div>
             
-            <div className="flex items-center space-x-4">
-              <label className="text-sm font-medium text-gray-700">並び順:</label>
+            <div className="flex items-center space-x-3">
+              <label className="text-xs font-medium text-gray-700">並び順:</label>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                className="border border-gray-300 rounded-md px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               >
                 <option value="date">日付順</option>
                 <option value="amount">金額順</option>
@@ -268,21 +339,21 @@ const Transactions: React.FC = () => {
         </div>
 
         {/* 取引一覧 */}
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-          <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-              <ClockIcon className="h-5 w-5 mr-2 text-primary-600" />
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-3 border-b border-gray-200">
+            <h3 className="text-base font-semibold text-gray-900 flex items-center">
+              <ClockIcon className="h-4 w-4 mr-2 text-primary-600" />
               取引一覧 ({sortedTransactions.length}件)
             </h3>
           </div>
           
           {sortedTransactions.length === 0 ? (
-            <div className="p-12 text-center">
-              <div className="mx-auto h-24 w-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-                <ClockIcon className="h-12 w-12 text-gray-400" />
+            <div className="p-8 text-center">
+              <div className="mx-auto h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <ClockIcon className="h-8 w-8 text-gray-400" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">取引履歴がありません</h3>
-              <p className="text-gray-600">指定された条件に一致する取引が見つかりません</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-1.5">取引履歴がありません</h3>
+              <p className="text-sm text-gray-600">指定された条件に一致する取引が見つかりません</p>
             </div>
           ) : (
             <div className="divide-y divide-gray-100">
@@ -291,20 +362,20 @@ const Transactions: React.FC = () => {
                 const colorClass = getTransactionColor(transaction.transactionType);
                 
                 return (
-                  <div key={transaction.id} className="p-6 hover:bg-gray-50 transition-colors duration-200">
+                  <div key={transaction.id} className="p-4 hover:bg-gray-50 transition-colors duration-200">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
-                        <div className={`h-12 w-12 rounded-xl flex items-center justify-center ${colorClass}`}>
-                          <IconComponent className="h-6 w-6" />
+                        <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${colorClass}`}>
+                          <IconComponent className="h-5 w-5" />
                         </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
+                        <div className="ml-3">
+                          <div className="text-xs font-medium text-gray-900">
                             {transaction.description}
                           </div>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-xs text-gray-500">
                             {getTransactionTypeLabel(transaction.transactionType)} • {transaction.referenceNumber}
                           </div>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-xs text-gray-500">
                             {new Date(transaction.transactionDate).toLocaleDateString('ja-JP', {
                               year: 'numeric',
                               month: 'long',
@@ -317,15 +388,15 @@ const Transactions: React.FC = () => {
                       </div>
                       
                       <div className="text-right">
-                        <div className={`text-lg font-bold ${
+                        <div className={`text-base font-bold ${
                           transaction.transactionType === 'DEPOSIT' ? 'text-green-600' : 'text-red-600'
                         }`}>
                           {transaction.transactionType === 'DEPOSIT' ? '+' : '-'}¥{transaction.amount.toLocaleString()}
                         </div>
-                        <div className="text-sm text-gray-500">
+                        <div className="text-xs text-gray-500">
                           {transaction.currency}
                         </div>
-                        <div className={`mt-1 inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(transaction.status)}`}>
+                        <div className={`mt-1 inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${getStatusColor(transaction.status)}`}>
                           {getStatusLabel(transaction.status)}
                         </div>
                       </div>
