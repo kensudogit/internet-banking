@@ -7,6 +7,9 @@ COPY gradle ./gradle
 COPY gradlew ./
 COPY gradlew.bat ./
 
+# gradlewに実行権限を付与
+RUN chmod +x ./gradlew
+
 # build.gradle.ktsをコピー
 COPY build.gradle.kts ./
 COPY settings.gradle.kts* ./
