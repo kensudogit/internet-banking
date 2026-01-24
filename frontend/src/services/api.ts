@@ -118,6 +118,26 @@ export const apiService = {
       });
 
       console.log('Register response status:', response.status);
+      console.log('Register response Content-Type:', response.headers.get('Content-Type'));
+
+      // レスポンスがHTMLの場合（JSONではない場合）を検出
+      const contentType = response.headers.get('Content-Type') || '';
+      if (!contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('Register API returned non-JSON response:', text.substring(0, 200));
+        
+        // HTMLレスポンスの場合、環境変数が設定されていない可能性が高い
+        if (text.trim().startsWith('<!doctype') || text.trim().startsWith('<!DOCTYPE') || text.includes('<html')) {
+          throw new Error(
+            'APIエンドポイントに接続できません。' +
+            'Railway Dashboardでフロントエンドサービスの環境変数に' +
+            'REACT_APP_API_URLを設定してください。' +
+            '詳細はRAILWAY_FRONTEND_API_URL_FIX.mdを参照してください。'
+          );
+        }
+        
+        throw new Error(`サーバーが予期しない形式のレスポンスを返しました。ステータス: ${response.status}`);
+      }
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: '登録に失敗しました' }));
@@ -128,8 +148,19 @@ export const apiService = {
       const result = await response.json();
       console.log('Register success:', result);
       return result;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error registering user:', error);
+      // 既に適切なエラーメッセージが設定されている場合はそのまま
+      if (error.message && !error.message.includes('APIエンドポイント')) {
+        // SyntaxErrorの場合、より分かりやすいメッセージに変換
+        if (error.name === 'SyntaxError' || error.message.includes('Unexpected token')) {
+          throw new Error(
+            'APIエンドポイントに接続できません。' +
+            'Railway Dashboardでフロントエンドサービスの環境変数に' +
+            'REACT_APP_API_URL=https://internet-banking-production-b084.up.railway.app/api を設定してください。'
+          );
+        }
+      }
       throw error;
     }
   },
@@ -149,6 +180,26 @@ export const apiService = {
       });
 
       console.log('Login response status:', response.status);
+      console.log('Login response Content-Type:', response.headers.get('Content-Type'));
+
+      // レスポンスがHTMLの場合（JSONではない場合）を検出
+      const contentType = response.headers.get('Content-Type') || '';
+      if (!contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('Login API returned non-JSON response:', text.substring(0, 200));
+        
+        // HTMLレスポンスの場合、環境変数が設定されていない可能性が高い
+        if (text.trim().startsWith('<!doctype') || text.trim().startsWith('<!DOCTYPE') || text.includes('<html')) {
+          throw new Error(
+            'APIエンドポイントに接続できません。' +
+            'Railway Dashboardでフロントエンドサービスの環境変数に' +
+            'REACT_APP_API_URLを設定してください。' +
+            '詳細はRAILWAY_FRONTEND_API_URL_FIX.mdを参照してください。'
+          );
+        }
+        
+        throw new Error(`サーバーが予期しない形式のレスポンスを返しました。ステータス: ${response.status}`);
+      }
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'ログインに失敗しました' }));
@@ -159,8 +210,19 @@ export const apiService = {
       const result = await response.json();
       console.log('Login success:', result);
       return result;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error logging in:', error);
+      // 既に適切なエラーメッセージが設定されている場合はそのまま
+      if (error.message && !error.message.includes('APIエンドポイント')) {
+        // SyntaxErrorの場合、より分かりやすいメッセージに変換
+        if (error.name === 'SyntaxError' || error.message.includes('Unexpected token')) {
+          throw new Error(
+            'APIエンドポイントに接続できません。' +
+            'Railway Dashboardでフロントエンドサービスの環境変数に' +
+            'REACT_APP_API_URL=https://internet-banking-production-b084.up.railway.app/api を設定してください。'
+          );
+        }
+      }
       throw error;
     }
   },
