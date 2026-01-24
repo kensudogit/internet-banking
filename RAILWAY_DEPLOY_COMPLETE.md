@@ -55,7 +55,8 @@ SPRING_DATASOURCE_PASSWORD=[PGPASSWORD]
 JWT_SECRET=your-very-long-and-secure-secret-key-change-this-in-production-minimum-32-characters
 
 # サーバー設定
-SERVER_PORT=8080
+# 注意: SERVER_PORT は設定しないでください。Railwayが自動的に $PORT を設定します。
+# application.yml で ${PORT:8080} を使用することで、Railwayのポートを自動的に使用します。
 
 # CORS設定（フロントエンドの公開URLを後で設定）
 # 一時的にワイルドカードを使用（後で更新）

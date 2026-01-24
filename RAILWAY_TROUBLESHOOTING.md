@@ -16,30 +16,37 @@ Railwayでバックエンドをビルドする際に、Root Directoryが正し�
 
 **解決方法:**
 
-#### 方法1: Railway Dashboard で設定を確認・修正
+#### 方法1: Railway Dashboard で設定を確認・修正（最重要）
 
 1. Railway Dashboard にログイン
 2. プロジェクトを選択
 3. バックエンドサービスを選択
 4. 「**Settings**」タブを開く
-5. 「**Source**」セクションで以下を確認：
+5. **「Source」セクションを確認**（画面右側のサイドバー）
    - **Root Directory**: `backend` に設定されているか確認
    - **Dockerfile Path**: `Dockerfile` に設定されているか確認
-6. 設定が間違っている場合は修正し、保存
+6. **設定が空欄または間違っている場合**:
+   - Root Directory に `backend` を入力
+   - Dockerfile Path に `Dockerfile` を入力
+   - 「**Save**」をクリック
+7. サービスを再デプロイ（自動的に開始される場合もあります）
 
-#### 方法2: サービスを再作成
+**重要**: Root Directory が空欄の場合、Railwayはプロジェクトルートをビルドコンテキストとして使用します。そのため、`backend/src` ではなく `/src` を探してしまいます。
+
+#### 方法2: サービスを削除して再作成
 
 1. バックエンドサービスを削除
+   - サービスを選択 → 「**Settings**」タブ → 最下部の「**Delete Service**」
 2. 新しいサービスを作成
-3. 「**+ New**」→「**GitHub Repo**」→ 同じリポジトリを選択
-4. **Settings タブで以下を設定**：
-   - **Root Directory**: `backend`
+   - 「**+ New**」→「**GitHub Repo**」→ 同じリポジトリを選択
+3. **Settings タブで以下を設定**（作成直後に設定）：
+   - **Root Directory**: `backend`（**必ず設定**）
    - **Dockerfile Path**: `Dockerfile`
    - **Start Command**: `java -jar app.jar`
-5. 環境変数を再設定
-6. デプロイを開始
+4. 環境変数を再設定（Variables タブ）
+5. デプロイを開始（自動的に開始されます）
 
-#### 方法3: ビルドコンテキストを確認
+#### 方法3: ビルドログでコンテキストを確認
 
 Railwayのビルドログで、ビルドコンテキストが正しいか確認：
 
@@ -48,6 +55,26 @@ context: [context-id]
 ```
 
 Root Directory が `backend` に設定されている場合、ビルドコンテキストは `backend` ディレクトリになります。
+
+#### 方法4: railway.json ファイルを確認
+
+プロジェクトルートの `railway.json` ファイルを確認：
+
+```json
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "backend/Dockerfile"
+  }
+}
+```
+
+**注意**: `railway.json` で `dockerfilePath` を `backend/Dockerfile` に設定している場合、Root Directory を空欄にすると、Railwayはプロジェクトルートをビルドコンテキストとして使用します。そのため、Root Directory を `backend` に設定する必要があります。
+
+#### 方法5: 一時的な回避策（推奨しない）
+
+Root Directory を設定できない場合の一時的な回避策として、プロジェクトルートに `Dockerfile` を作成し、ビルドコンテキストを変更することもできますが、**推奨しません**。正しい方法は Root Directory を設定することです。
 
 ### エラー2: データベース接続エラー
 
@@ -135,7 +162,39 @@ Access to fetch at 'https://...' from origin 'https://...' has been blocked by C
    - PostgreSQL サービスに接続
    - `schema.sql` を手動で実行
 
-### エラー6: JARファイルが見つからない
+### エラー6: Permission denied (gradlew)
+
+**エラーメッセージ:**
+```
+/bin/sh: 1: ./gradlew: Permission denied
+ERROR: failed to build: failed to solve: process "/bin/sh -c ./gradlew clean bootJar -x test --no-daemon" did not complete successfully: exit code: 126
+```
+
+**原因:**
+`gradlew` ファイルに実行権限が設定されていないため、Dockerコンテナ内で実行できません。
+
+**解決方法:**
+
+1. **Dockerfile の確認**
+   - `gradlew` をコピーした後、実行権限を付与する必要があります
+   - Dockerfileに `RUN chmod +x ./gradlew` を追加
+
+2. **修正済みのDockerfile**
+   ```dockerfile
+   # Gradleラッパーをコピー
+   COPY gradle ./gradle
+   COPY gradlew ./
+   COPY gradlew.bat ./
+   
+   # gradlewに実行権限を付与
+   RUN chmod +x ./gradlew
+   ```
+
+3. **再デプロイ**
+   - Dockerfileを修正した後、GitHubにプッシュ
+   - Railwayで自動的に再デプロイが開始されます
+
+### エラー7: JARファイルが見つからない
 
 **エラーメッセージ:**
 ```
@@ -181,6 +240,69 @@ Error: Unable to access jarfile app.jar
 
 Railwayでは、同じプロジェクト内のサービス間で自動的に接続が提供されます。環境変数で接続情報を設定する必要があります。
 
+### エラー8: 502 Bad Gateway エラー
+
+**エラーメッセージ（ブラウザコンソール）:**
+```
+Failed to load resource: the server responded with a status of 502 ()
+/favicon.ico:1 Failed to load resource: the server responded with a status of 502 ()
+```
+
+**原因:**
+502 Bad Gatewayエラーは、バックエンドサーバーが起動していない、または正しく動作していない場合に発生します。
+
+**解決方法:**
+
+1. **バックエンドサービスの状態を確認**
+   - Railway Dashboard → バックエンドサービス
+   - サービスが「**Running**」状態になっているか確認
+   - 「**Stopped**」または「**Failed**」の場合は、ログを確認
+
+2. **バックエンドのログを確認**
+   - Railway Dashboard → バックエンドサービス → 「**Logs**」タブ
+   - エラーメッセージを確認
+   - アプリケーションが正常に起動しているか確認
+
+3. **よくある原因と解決方法**
+
+   **原因1: データベース接続エラー**
+   - ログに「Connection refused」や「Could not connect to database」が表示される
+   - PostgreSQL サービスが起動しているか確認
+   - 環境変数 `SPRING_DATASOURCE_URL` が正しいか確認
+
+   **原因2: ポート設定の問題**
+   - Railwayは自動的にポートを割り当てます
+   - `SERVER_PORT` 環境変数を設定しないでください（削除するか、`$PORT` を使用）
+
+   **原因3: アプリケーションの起動エラー**
+   - ログにJavaのエラーが表示される
+   - JARファイルが正しくビルドされているか確認
+   - ビルドログでエラーがないか確認
+
+4. **バックエンドの再起動**
+   - Railway Dashboard → バックエンドサービス → 「**Deployments**」タブ
+   - 「**Redeploy**」ボタンをクリック
+
+5. **ヘルスチェックエンドポイントの確認**
+   - バックエンドの公開URLに直接アクセス
+   - 例: `https://backend-production.up.railway.app/api/actuator/health`
+   - 応答があるか確認
+
+### エラー9: content.js エラー（ブラウザ拡張機能）
+
+**エラーメッセージ（ブラウザコンソール）:**
+```
+content.js:1 Uncaught (in promise) The message port closed before a response was received.
+```
+
+**原因:**
+これはブラウザ拡張機能（Chrome拡張機能など）のエラーで、アプリケーション自体の問題ではありません。
+
+**解決方法:**
+- **無視して問題ありません**
+- アプリケーションの動作には影響しません
+- 気になる場合は、ブラウザ拡張機能を無効化するか、別のブラウザで試してください
+
 ## 📞 サポート
 
 問題が解決しない場合は、以下を確認してください：
@@ -200,3 +322,4 @@ Railwayでは、同じプロジェクト内のサービス間で自動的に接�
 - [ ] バックエンドとフロントエンドの公開ドメインが生成されている
 - [ ] CORS設定が正しい
 - [ ] API URLが正しい
+- [ ] バックエンドサービスが「Running」状態になっている
