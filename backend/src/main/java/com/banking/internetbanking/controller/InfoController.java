@@ -277,6 +277,18 @@ FRONTEND_URL=https://[フロントエンドの公開URL]</pre>
     }
 
     /**
+     * Faviconエンドポイント
+     * ブラウザのfaviconリクエストに対応します。
+     * 
+     * @return 204 No Content（faviconなし）
+     */
+    @GetMapping("/favicon.ico")
+    public ResponseEntity<Void> favicon() {
+        // faviconがない場合は204 No Contentを返す
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
      * API情報エンドポイント
      * アプリケーションの基本情報を返します。
      * 
