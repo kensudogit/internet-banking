@@ -14,7 +14,8 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = { "http://localhost:3000", "http://localhost:8080" })
+// CORS設定はSecurityConfigで一元管理するため、@CrossOriginは削除
+// RailwayのフロントエンドドメインはSecurityConfigのCORS設定で許可されます
 public class AuthController {
 
     private final UserService userService;

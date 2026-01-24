@@ -71,13 +71,23 @@ public class SecurityConfig {
         // 環境変数から許可するオリジンを取得（カンマ区切り）
         String allowedOrigins = System.getenv("CORS_ALLOWED_ORIGINS");
         if (allowedOrigins != null && !allowedOrigins.isEmpty()) {
-            configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
+            // カンマ区切りのオリジンをリストに変換（前後の空白を削除）
+            configuration.setAllowedOrigins(
+                Arrays.asList(allowedOrigins.split(","))
+                    .stream()
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .collect(java.util.stream.Collectors.toList())
+            );
         } else {
             // デフォルト: ローカル開発環境とRailwayの一般的なドメイン
+            // 注意: ワイルドカードパターンはSpring Securityでは動作しないため、
+            // 環境変数CORS_ALLOWED_ORIGINSで具体的なドメインを指定することを推奨
             configuration.setAllowedOrigins(Arrays.asList(
                     "http://localhost:3000",
-                    "https://*.railway.app",
-                    "https://*.vercel.app"));
+                    "http://localhost:8080",
+                    "https://internet-banking-production-b084.up.railway.app",
+                    "https://internet-banking-frontend-production.up.railway.app"));
         }
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
