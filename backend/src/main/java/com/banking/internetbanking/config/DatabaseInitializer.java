@@ -1,38 +1,42 @@
 package com.banking.internetbanking.config;
 
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.core.annotation.Order;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 
+import javax.sql.DataSource;
 import java.nio.charset.StandardCharsets;
 
 /**
  * データベース初期化コンポーネント
  * Railway環境などでスキーマが自動初期化されない場合に使用
- * ApplicationListenerを使用して、Springコンテキストがリフレッシュされた後に実行
- * ただし、Spring Bootの標準SQL初期化機能（spring.sql.init.mode=always）が優先される
+ * @PostConstructを使用して、Beanの初期化時に実行される
+ * @DependsOn("dataSource")により、DataSourceが初期化された後に実行される
+ * Spring Bootの標準SQL初期化機能（spring.sql.init.mode=always）が優先されるが、
+ * このコンポーネントはフォールバックとして機能する
  */
 @Component
-@Order(0) // 他のリスナーより先に実行
-public class DatabaseInitializer implements ApplicationListener<ContextRefreshedEvent> {
+@DependsOn("dataSource")
+public class DatabaseInitializer {
 
     private static final Logger logger = LoggerFactory.getLogger(DatabaseInitializer.class);
 
     private final JdbcTemplate jdbcTemplate;
+    private final DataSource dataSource;
 
     /** SQL初期化モード（always, never, embedded） */
     @Value("${spring.sql.init.mode:never}")
     private String sqlInitMode;
 
     /** SQL初期化が有効かどうか */
-    @Value("${spring.sql.init.enabled:false}")
+    @Value("${spring.sql.init.enabled:true}")
     private boolean sqlInitEnabled;
 
     /** データベース自動初期化が有効かどうか */
@@ -43,26 +47,46 @@ public class DatabaseInitializer implements ApplicationListener<ContextRefreshed
      * コンストラクタ
      * 
      * @param jdbcTemplate JdbcTemplateインスタンス
+     * @param dataSource DataSourceインスタンス
      */
-    public DatabaseInitializer(JdbcTemplate jdbcTemplate) {
+    @Autowired
+    public DatabaseInitializer(JdbcTemplate jdbcTemplate, DataSource dataSource) {
         this.jdbcTemplate = jdbcTemplate;
+        this.dataSource = dataSource;
     }
 
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-        // Spring Bootの標準SQL初期化機能（spring.sql.init.mode=always）が優先される
-        // このメソッドは、Spring Bootの標準機能が実行されなかった場合のフォールバックとして使用される
+    /**
+     * Beanの初期化時に実行される
+     * @PostConstructにより、DataSourceが初期化された後に実行される
+     * Spring Bootの標準SQL初期化機能（spring.sql.init.mode=always）が優先されるが、
+     * このメソッドはフォールバックとして機能する
+     */
+    @PostConstruct
+    public void initialize() {
+        // SPRING_SQL_INIT_MODE=always が設定されている場合、Spring Bootの標準機能が実行される
+        // このメソッドは、標準機能が実行されなかった場合のフォールバックとして使用される
         
-        // SPRING_SQL_INIT_MODE=always が設定されている場合、Spring Bootの標準機能が実行されるため、
-        // このメソッドは実行されない（または既にスキーマが初期化されている）
+        // SPRING_SQL_INIT_MODE=always が設定されている場合、このメソッドも実行されるが、
+        // テーブルが既に存在する場合はスキップされる
+        boolean shouldInitialize = "always".equalsIgnoreCase(sqlInitMode) || autoInit;
         
-        // autoInit=true が設定されている場合のみ、このメソッドを実行
-        if (!autoInit) {
-            logger.debug("データベース自動初期化は無効です（autoInit=false）。Spring Bootの標準SQL初期化機能に依存します。");
+        if (!shouldInitialize) {
+            logger.info("データベース自動初期化は無効です（sqlInitMode={}, autoInit={}）。Spring Bootの標準SQL初期化機能に依存します。", 
+                    sqlInitMode, autoInit);
             return;
         }
         
-        logger.info("データベース初期化を開始します（autoInit=true）");
+        logger.info("データベース初期化を開始します（sqlInitMode={}, autoInit={}）", 
+                sqlInitMode, autoInit);
+        
+        // 少し待機して、Spring Bootの標準SQL初期化機能が実行される機会を与える
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.warn("待機中に割り込みが発生しました", e);
+        }
+        
         initializeDatabase();
     }
     
