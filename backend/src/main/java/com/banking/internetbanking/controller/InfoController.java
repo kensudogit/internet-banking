@@ -35,8 +35,19 @@ public class InfoController {
      */
     @GetMapping("/")
     public ResponseEntity<?> root(HttpServletRequest request) {
-        // フロントエンドURLが設定されている場合、HTMLページを返してリダイレクト
-        if (frontendUrl != null && !frontendUrl.isEmpty() && !frontendUrl.equals("http://localhost:3000")) {
+        // フロントエンドURLを検証して正規化
+        String normalizedFrontendUrl = normalizeFrontendUrl(frontendUrl, request);
+        
+        // フロントエンドURLが有効な場合、HTMLページを返してリダイレクト
+        if (normalizedFrontendUrl != null && !normalizedFrontendUrl.isEmpty()) {
+            // HTMLエスケープ処理
+            String escapedUrl = normalizedFrontendUrl
+                .replace("&", "&amp;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;");
+            
             String html = String.format("""
                 <!DOCTYPE html>
                 <html lang="ja">
@@ -55,7 +66,7 @@ public class InfoController {
                     <p>自動的にリダイレクトされない場合は、<a href="%s">こちらをクリック</a>してください。</p>
                 </body>
                 </html>
-                """, frontendUrl, frontendUrl, frontendUrl);
+                """, escapedUrl, escapedUrl, escapedUrl);
             
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.TEXT_HTML);
@@ -75,6 +86,41 @@ public class InfoController {
                         "info", "/api/info"),
                 "note", "このURLはバックエンドAPIです。フロントエンドは別のURLで提供されています。",
                 "setup", "Railway Dashboard → バックエンドサービス → Variables → FRONTEND_URL=https://[フロントエンドの公開URL] を設定してください"));
+    }
+
+    /**
+     * フロントエンドURLを正規化する
+     * 相対パスや不完全なURLを完全なURLに変換します。
+     * 
+     * @param url フロントエンドURL
+     * @param request HTTPリクエスト
+     * @return 正規化されたURL、無効な場合はnull
+     */
+    private String normalizeFrontendUrl(String url, HttpServletRequest request) {
+        if (url == null || url.isEmpty() || url.equals("http://localhost:3000")) {
+            return null;
+        }
+        
+        // 既に完全なURL（http://またはhttps://で始まる）の場合
+        if (url.startsWith("http://") || url.startsWith("https://")) {
+            // 自分自身へのリダイレクトを防ぐ
+            String currentHost = request.getHeader("Host");
+            if (currentHost != null && url.contains(currentHost)) {
+                return null; // 自分自身へのリダイレクトは許可しない
+            }
+            return url;
+        }
+        
+        // 相対パスの場合、現在のリクエストのスキームとホストを使用
+        String scheme = request.getScheme();
+        String host = request.getHeader("Host");
+        if (host != null) {
+            // 相対パスが/で始まらない場合は/を追加
+            String path = url.startsWith("/") ? url : "/" + url;
+            return scheme + "://" + host + path;
+        }
+        
+        return null;
     }
 
     /**
