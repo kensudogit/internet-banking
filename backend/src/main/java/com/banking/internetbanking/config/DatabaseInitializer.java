@@ -22,12 +22,19 @@ public class DatabaseInitializer implements CommandLineRunner {
 
     private final JdbcTemplate jdbcTemplate;
 
+    /** SQL初期化が有効かどうか */
     @Value("${spring.sql.init.enabled:false}")
     private boolean sqlInitEnabled;
 
+    /** データベース自動初期化が有効かどうか */
     @Value("${app.database.auto-init:false}")
     private boolean autoInit;
 
+    /**
+     * コンストラクタ
+     * 
+     * @param jdbcTemplate JdbcTemplateインスタンス
+     */
     public DatabaseInitializer(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }

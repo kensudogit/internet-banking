@@ -41,6 +41,16 @@ server:
   #   context-path: /api
 
 logging:
+  # ログファイルの出力先設定
+  file:
+    name: logs/internet-banking.log  # プロジェクトルートのlogsディレクトリに出力
+    # path: logs  # または、パスのみ指定する場合（ファイル名はspring.log）
+  # ログファイルのローテーション設定
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB      # ファイルサイズが10MBを超えたらローテーション
+      max-history: 30           # 30日分のログを保持
+      total-size-cap: 1GB       # 合計サイズが1GBを超えたら古いログを削除
   level:
     com.banking.internetbanking: DEBUG
     com.banking.internetbanking.config: INFO

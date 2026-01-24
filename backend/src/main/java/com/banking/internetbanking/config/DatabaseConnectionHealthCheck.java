@@ -24,11 +24,23 @@ public class DatabaseConnectionHealthCheck implements CommandLineRunner {
     private final DataSource dataSource;
     private final JdbcTemplate jdbcTemplate;
 
+    /**
+     * コンストラクタ
+     * 
+     * @param dataSource データソース
+     * @param jdbcTemplate JdbcTemplateインスタンス
+     */
     public DatabaseConnectionHealthCheck(DataSource dataSource, JdbcTemplate jdbcTemplate) {
         this.dataSource = dataSource;
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    /**
+     * アプリケーション起動時にデータベース接続を確認します
+     * 接続に失敗した場合はリトライを行います。
+     * 
+     * @param args コマンドライン引数
+     */
     @Override
     public void run(String... args) {
         logger.info("=== データベース接続ヘルスチェック開始 ===");

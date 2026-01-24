@@ -6,6 +6,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+/**
+ * 認証コントローラークラス
+ * 
+ * ユーザー認証関連のREST APIエンドポイントを提供します。
+ * ユーザー登録、ログイン、ログアウトなどの機能を実装します。
+ */
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = { "http://localhost:3000", "http://localhost:8080" })
@@ -13,10 +19,21 @@ public class AuthController {
 
     private final UserService userService;
 
+    /**
+     * コンストラクタ
+     * 
+     * @param userService ユーザーサービス
+     */
     public AuthController(UserService userService) {
         this.userService = userService;
     }
 
+    /**
+     * ユーザー登録エンドポイント
+     * 
+     * @param request ユーザー登録情報（username, email, password, firstName, lastName, phoneNumber）
+     * @return 登録結果
+     */
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Map<String, Object> request) {
         try {
@@ -68,6 +85,12 @@ public class AuthController {
         }
     }
 
+    /**
+     * ログインエンドポイント
+     * 
+     * @param request ログイン情報（username, password）
+     * @return ログイン結果
+     */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
         try {
@@ -89,6 +112,11 @@ public class AuthController {
         }
     }
 
+    /**
+     * ログアウトエンドポイント
+     * 
+     * @return ログアウト結果
+     */
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
         // 実際の実装ではJWTトークンを無効化する

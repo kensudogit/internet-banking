@@ -20,10 +20,20 @@ public class PostgreSQLStatusChecker implements HealthIndicator {
 
     private final JdbcTemplate jdbcTemplate;
 
+    /**
+     * コンストラクタ
+     * 
+     * @param jdbcTemplate JdbcTemplateインスタンス
+     */
     public PostgreSQLStatusChecker(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    /**
+     * PostgreSQLのヘルス状態をチェックします
+     * 
+     * @return Healthオブジェクト（UPまたはDOWN）
+     */
     @Override
     public Health health() {
         try {

@@ -23,10 +23,20 @@ public class DatabaseStartupVerifier implements ApplicationRunner {
 
     private final JdbcTemplate jdbcTemplate;
 
+    /**
+     * コンストラクタ
+     * 
+     * @param jdbcTemplate JdbcTemplateインスタンス
+     */
     public DatabaseStartupVerifier(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    /**
+     * アプリケーション起動後にデータベースの状態を検証します
+     * 
+     * @param args アプリケーション引数
+     */
     @Override
     public void run(ApplicationArguments args) {
         logger.info("=== データベース起動検証開始 ===");
@@ -63,6 +73,9 @@ public class DatabaseStartupVerifier implements ApplicationRunner {
         }
     }
 
+    /**
+     * 必須テーブルの存在を確認します
+     */
     private void verifyRequiredTables() {
         logger.info("2. 必須テーブルの存在確認...");
         String[] requiredTables = { "users", "accounts", "transactions", "fixed_deposits", "loans", "security_logs" };
@@ -87,6 +100,9 @@ public class DatabaseStartupVerifier implements ApplicationRunner {
         }
     }
 
+    /**
+     * データベース設定を確認します
+     */
     private void verifyDatabaseSettings() {
         logger.info("3. データベース設定の確認...");
         try {
@@ -111,6 +127,9 @@ public class DatabaseStartupVerifier implements ApplicationRunner {
         }
     }
 
+    /**
+     * 接続プールの状態を確認します
+     */
     private void verifyConnectionPool() {
         logger.info("4. 接続プールの状態確認...");
         try {

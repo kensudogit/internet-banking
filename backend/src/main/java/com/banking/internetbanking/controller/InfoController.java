@@ -8,11 +8,22 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
+/**
+ * 情報コントローラークラス
+ * 
+ * API情報を提供するREST APIエンドポイントを実装します。
+ * アプリケーションのバージョン情報やエンドポイント一覧を返します。
+ */
 @RestController
 @CrossOrigin(origins = { "http://localhost:3000", "http://localhost:8080" })
 public class InfoController {
 
-    // ルートパス（/）にアクセスした場合のエンドポイント
+    /**
+     * ルートパス（/）にアクセスした場合のエンドポイント
+     * APIの基本情報とエンドポイント一覧を返します。
+     * 
+     * @return API情報
+     */
     @GetMapping("/")
     public ResponseEntity<?> root() {
         return ResponseEntity.ok(Map.of(
@@ -27,6 +38,12 @@ public class InfoController {
                         "info", "/api/info")));
     }
 
+    /**
+     * API情報エンドポイント
+     * アプリケーションの基本情報を返します。
+     * 
+     * @return API情報
+     */
     @GetMapping("/api/info")
     public ResponseEntity<?> info() {
         return ResponseEntity.ok(Map.of(
