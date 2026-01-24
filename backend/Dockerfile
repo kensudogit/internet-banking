@@ -4,11 +4,13 @@ WORKDIR /app
 
 # Gradleラッパーをコピー
 COPY gradle ./gradle
-COPY gradlew ./
-COPY gradlew.bat ./
+COPY gradlew* ./
 
-# gradlewに実行権限を付与
-RUN chmod +x ./gradlew
+# gradlewの改行コードをLFに変換（WindowsのCRLFをLinux用に変換）し、実行権限を付与
+RUN tr -d '\r' < ./gradlew > ./gradlew.tmp && \
+    mv ./gradlew.tmp ./gradlew && \
+    chmod +x ./gradlew && \
+    ls -la ./gradlew
 
 # build.gradle.ktsをコピー
 COPY build.gradle.kts ./
