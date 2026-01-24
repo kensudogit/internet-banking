@@ -3,7 +3,9 @@ package com.banking.internetbanking.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -14,13 +16,20 @@ import java.nio.charset.StandardCharsets;
 /**
  * データベース初期化コンポーネント
  * Railway環境などでスキーマが自動初期化されない場合に使用
+ * ApplicationListenerを使用して、Springコンテキストがリフレッシュされた後に実行
+ * ただし、Spring Bootの標準SQL初期化機能（spring.sql.init.mode=always）が優先される
  */
 @Component
-public class DatabaseInitializer implements CommandLineRunner {
+@Order(0) // 他のリスナーより先に実行
+public class DatabaseInitializer implements ApplicationListener<ContextRefreshedEvent> {
 
     private static final Logger logger = LoggerFactory.getLogger(DatabaseInitializer.class);
 
     private final JdbcTemplate jdbcTemplate;
+
+    /** SQL初期化モード（always, never, embedded） */
+    @Value("${spring.sql.init.mode:never}")
+    private String sqlInitMode;
 
     /** SQL初期化が有効かどうか */
     @Value("${spring.sql.init.enabled:false}")
@@ -40,11 +49,27 @@ public class DatabaseInitializer implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) {
-        if (!autoInit && !sqlInitEnabled) {
-            logger.info("データベース自動初期化は無効です。スキップします。");
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        // Spring Bootの標準SQL初期化機能（spring.sql.init.mode=always）が優先される
+        // このメソッドは、Spring Bootの標準機能が実行されなかった場合のフォールバックとして使用される
+        
+        // SPRING_SQL_INIT_MODE=always が設定されている場合、Spring Bootの標準機能が実行されるため、
+        // このメソッドは実行されない（または既にスキーマが初期化されている）
+        
+        // autoInit=true が設定されている場合のみ、このメソッドを実行
+        if (!autoInit) {
+            logger.debug("データベース自動初期化は無効です（autoInit=false）。Spring Bootの標準SQL初期化機能に依存します。");
             return;
         }
+        
+        logger.info("データベース初期化を開始します（autoInit=true）");
+        initializeDatabase();
+    }
+    
+    /**
+     * データベース初期化処理（フォールバック用）
+     */
+    private void initializeDatabase() {
 
         try {
             // データベース接続の確認（リトライ付き）
@@ -84,9 +109,11 @@ public class DatabaseInitializer implements CommandLineRunner {
             Integer tableCount = jdbcTemplate.queryForObject(checkTableQuery, Integer.class);
 
             if (tableCount != null && tableCount > 0) {
-                logger.info("データベーススキーマは既に初期化されています（usersテーブルが存在します）。");
+                logger.info("データベーススキーマは既に初期化されています（usersテーブルが存在します）。スキップします。");
                 return;
             }
+            
+            logger.info("テーブルが存在しないため、スキーマを初期化します。");
 
             logger.info("データベーススキーマを初期化しています...");
 
