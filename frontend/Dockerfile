@@ -43,4 +43,6 @@ COPY --from=build /app/build ./build
 EXPOSE 3000
 
 # 静的ファイルを配信（Railwayの$PORT環境変数を使用）
-CMD sh -c "serve -s build -l ${PORT:-3000}"
+# Railwayが自動的に$PORT環境変数を設定するため、シェルで展開
+# serveコマンドの-pオプション（ポート）を使用
+CMD sh -c "serve -s build -p ${PORT:-3000}"
