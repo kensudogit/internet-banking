@@ -39,8 +39,8 @@ RUN npm install -g serve
 # ビルド済みのファイルをコピー
 COPY --from=build /app/build ./build
 
-# ポートを公開
+# ポートを公開（Railwayが自動的に割り当てるポートを使用）
 EXPOSE 3000
 
-# 静的ファイルを配信
-CMD ["serve", "-s", "build", "-l", "3000"]
+# 静的ファイルを配信（Railwayの$PORT環境変数を使用）
+CMD sh -c "serve -s build -l ${PORT:-3000}"
