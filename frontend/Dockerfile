@@ -23,9 +23,25 @@ RUN npm cache clean --force && \
 COPY . .
 
 # アプリケーションをビルド（react-scriptsのパスを明示的に指定）
+# Railwayの環境変数をビルド時に使用するため、ARGとして定義
+# Railwayは自動的に環境変数をビルドプロセスに渡しますが、
+# DockerfileでARGとして定義することで、ビルド時に確実に使用できます
+ARG REACT_APP_API_URL
+ARG REACT_APP_ENV
+ARG REACT_APP_USE_MOCK_API
+
+# 環境変数をENVとして設定（ビルド時に使用される）
+ENV REACT_APP_API_URL=${REACT_APP_API_URL}
+ENV REACT_APP_ENV=${REACT_APP_ENV}
+ENV REACT_APP_USE_MOCK_API=${REACT_APP_USE_MOCK_API}
+
 RUN echo "=== ビルド前確認 ===" && \
     which react-scripts || echo "react-scripts not in PATH" && \
     test -f node_modules/.bin/react-scripts && echo "react-scripts file exists" || echo "react-scripts file NOT EXISTS" && \
+    echo "=== 環境変数確認 ===" && \
+    echo "REACT_APP_API_URL=${REACT_APP_API_URL:-未設定}" && \
+    echo "REACT_APP_ENV=${REACT_APP_ENV:-未設定}" && \
+    echo "REACT_APP_USE_MOCK_API=${REACT_APP_USE_MOCK_API:-未設定}" && \
     echo "=== ビルド開始 ===" && \
     npm run build
 
