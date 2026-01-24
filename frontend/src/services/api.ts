@@ -2,15 +2,40 @@ import { mockApiService, shouldUseMockApi } from './mockApi';
 
 // 環境変数が設定されている場合はそれを使用、そうでない場合は実行時に判断
 // 開発環境（localhost:3000）ではバックエンドの絶対URLを使用
+// Railway環境では、バックエンドのURLを推測または環境変数から取得
 const getApiBaseUrl = () => {
+  // 環境変数が明示的に設定されている場合はそれを使用
   if (process.env.REACT_APP_API_URL) {
     return process.env.REACT_APP_API_URL;
   }
+  
   // 実行時にホスト名を確認
   const hostname = window.location.hostname;
+  const protocol = window.location.protocol;
+  
+  // ローカル開発環境
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return 'http://localhost:8080/api';
   }
+  
+  // Railway環境（*.up.railway.app または *.railway.app）
+  // フロントエンドとバックエンドが同じドメインの場合は相対パスを使用
+  // 異なるドメインの場合は、バックエンドのURLを推測
+  if (hostname.includes('railway.app') || hostname.includes('railway')) {
+    // Railwayでは、フロントエンドとバックエンドが別サービスとしてデプロイされる場合が多い
+    // 環境変数が設定されていない場合は、同じドメインを想定して相対パスを使用
+    // ただし、バックエンドのURLが異なる場合は、REACT_APP_API_URLを設定する必要がある
+    console.warn(
+      '⚠️ REACT_APP_API_URLが設定されていません。' +
+      'Railwayでフロントエンドとバックエンドが別サービスとしてデプロイされている場合、' +
+      'フロントエンドサービスの環境変数にREACT_APP_API_URLを設定してください。' +
+      '例: REACT_APP_API_URL=https://internet-banking-production-b084.up.railway.app/api'
+    );
+    // デフォルトでは相対パスを使用（同じドメインの場合）
+    return '/api';
+  }
+  
+  // その他の環境（相対パスを使用）
   return '/api';
 };
 
