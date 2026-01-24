@@ -39,5 +39,7 @@ WORKDIR /app
 COPY --from=build /app/build/libs/*.jar app.jar
 
 # JARファイルを実行
+# 注意: Railwayは自動的にポートを割り当て、$PORT環境変数に設定します
+# application.ymlで ${PORT:8080} を使用することで、Railwayのポートを自動的に使用します
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
