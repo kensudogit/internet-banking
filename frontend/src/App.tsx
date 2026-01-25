@@ -31,9 +31,10 @@ const MainContent: React.FC = () => {
   return (
     <main className="container mx-auto px-4 py-8">
       <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/" element={<Dashboard />} />
+        {/* 認証画面を非表示：ログイン・登録画面をDashboardにリダイレクト */}
+        <Route path="/login" element={<Dashboard />} />
+        <Route path="/register" element={<Dashboard />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/accounts" element={<Accounts />} />
         <Route path="/transactions" element={<Transactions />} />

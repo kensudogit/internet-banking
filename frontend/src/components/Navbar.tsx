@@ -3,7 +3,8 @@ import { Link, useLocation } from 'react-router-dom';
 
 const Navbar: React.FC = () => {
   const location = useLocation();
-  const isAuthenticated = localStorage.getItem('token');
+  // 認証処理を迂回するため、常に認証済みとして扱う
+  const isAuthenticated = true;
 
   const navigation = [
     { name: 'ダッシュボード', href: '/dashboard' },
@@ -43,7 +44,8 @@ const Navbar: React.FC = () => {
             )}
           </div>
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
-            {isAuthenticated ? (
+            {/* 認証処理を無効化：ログアウトボタンを非表示 */}
+            {/* {isAuthenticated ? (
               <button
                 onClick={() => {
                   localStorage.removeItem('token');
@@ -68,7 +70,7 @@ const Navbar: React.FC = () => {
                   新規登録
                 </Link>
               </div>
-            )}
+            )} */}
           </div>
         </div>
       </div>
