@@ -104,31 +104,19 @@ public class SecurityConfig {
         }
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        // setAllowedHeadersに"*"を設定すると、setAllowCredentials(true)と組み合わせた場合に問題が発生します
-        // 代わりに、setAllowedHeaderPatternsを使用してすべてのヘッダーを許可します
+        // setAllowedHeaderPatternsを使用してすべてのヘッダーを許可（setAllowCredentials(true)と組み合わせ可能）
         configuration.setAllowedHeaderPatterns(Arrays.asList("*"));
-        // 一般的なCORSヘッダーも明示的に許可
-        configuration.setAllowedHeaders(Arrays.asList(
-                "Authorization",
-                "Content-Type",
-                "X-Requested-With",
-                "Accept",
-                "Origin",
-                "Access-Control-Request-Method",
-                "Access-Control-Request-Headers"
-        ));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
         
         // デバッグ: 設定内容を確認
-        System.out.println("CORS設定詳細:");
+        System.out.println("=== Spring Security CORS設定 ===");
         System.out.println("  Allowed Origins: " + configuration.getAllowedOrigins());
         System.out.println("  Allowed Methods: " + configuration.getAllowedMethods());
-        System.out.println("  Allowed Headers: " + configuration.getAllowedHeaders());
         System.out.println("  Allowed Header Patterns: " + configuration.getAllowedHeaderPatterns());
         System.out.println("  Allow Credentials: " + configuration.getAllowCredentials());
         System.out.println("  Max Age: " + configuration.getMaxAge());
-        System.out.println("===================");
+        System.out.println("=================================");
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
