@@ -25,6 +25,11 @@ public class SimpleCorsFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         
+        System.out.println("=== SimpleCorsFilter実行 ===");
+        System.out.println("Method: " + request.getMethod());
+        System.out.println("URI: " + request.getRequestURI());
+        System.out.println("Origin: " + request.getHeader("Origin"));
+        
         // すべてのオリジンを許可
         response.setHeader("Access-Control-Allow-Origin", "*");
         
@@ -56,11 +61,15 @@ public class SimpleCorsFilter extends OncePerRequestFilter {
         
         // OPTIONSリクエスト（プリフライト）の場合は、ここで処理を終了
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            System.out.println("OPTIONSリクエストを処理します");
             response.setStatus(HttpServletResponse.SC_OK);
+            System.out.println("CORSヘッダーを設定しました");
             return;
         }
         
         // 次のフィルターに進む
+        System.out.println("次のフィルターに進みます");
         filterChain.doFilter(request, response);
+        System.out.println("フィルターチェーン完了");
     }
 }

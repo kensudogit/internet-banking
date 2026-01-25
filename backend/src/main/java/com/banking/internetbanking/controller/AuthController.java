@@ -1,6 +1,7 @@
 package com.banking.internetbanking.controller;
 
 import com.banking.internetbanking.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +27,14 @@ public class AuthController {
      */
     public AuthController(UserService userService) {
         this.userService = userService;
+    }
+
+    /**
+     * OPTIONSリクエスト（プリフライト）を処理
+     */
+    @RequestMapping(value = "/**", method = RequestMethod.OPTIONS)
+    public ResponseEntity<?> handleOptions() {
+        return ResponseEntity.ok().build();
     }
 
     /**
