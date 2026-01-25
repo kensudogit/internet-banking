@@ -20,8 +20,9 @@ import java.io.IOException;
  * すべてのリクエストに対してCORSヘッダーを追加します。
  * Spring SecurityのCORS処理を迂回して、シンプルにCORSヘッダーを設定します。
  */
-@Component
-@Order(Ordered.HIGHEST_PRECEDENCE)
+// CorsConfigでSpringのCorsFilterを使用するため、このクラスは無効化
+// @Component
+// @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CorsFilter implements Filter {
 
     @Override
