@@ -49,6 +49,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                // CORS設定: UrlBasedCorsConfigurationSourceがBeanとして存在する場合、自動的に使用されます
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -65,10 +66,12 @@ public class SecurityConfig {
      * CORS設定ソースのBean定義
      * 環境変数から許可するオリジンを取得し、CORS設定を構成します。
      * 
-     * @return CorsConfigurationSourceインスタンス
+     * Spring Security 6では、UrlBasedCorsConfigurationSourceをBeanとして返す必要があります。
+     * 
+     * @return UrlBasedCorsConfigurationSourceインスタンス
      */
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // 環境変数から許可するオリジンを取得（カンマ区切り）
