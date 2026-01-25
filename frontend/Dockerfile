@@ -11,8 +11,19 @@ RUN npm install
 # ソースコードをコピー
 COPY . .
 
+# ビルド前にファイルの存在を確認（デバッグ用）
+RUN echo "=== ビルド前のファイル確認 ===" && \
+    ls -la src/pages/Login.tsx && \
+    ls -la src/pages/Register.tsx && \
+    ls -la src/App.tsx && \
+    echo "=== ビルド開始 ==="
+
 # アプリケーションをビルド
 RUN npm run build
+
+# ビルド後の確認（デバッグ用）
+RUN echo "=== ビルド完了 ===" && \
+    ls -la build/static/js/ | head -5
 
 # 本番ステージ
 FROM node:18-alpine
