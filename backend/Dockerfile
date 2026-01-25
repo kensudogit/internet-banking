@@ -4,13 +4,11 @@ WORKDIR /app
 
 # Gradleラッパーをコピー
 COPY gradle ./gradle
-COPY gradlew* ./
+COPY gradlew ./
+COPY gradlew.bat ./
 
-# gradlewの改行コードをLFに変換（WindowsのCRLFをLinux用に変換）し、実行権限を付与
-RUN tr -d '\r' < ./gradlew > ./gradlew.tmp && \
-    mv ./gradlew.tmp ./gradlew && \
-    chmod +x ./gradlew && \
-    ls -la ./gradlew
+# gradlewに実行権限を付与
+RUN chmod +x ./gradlew
 
 # build.gradle.ktsをコピー
 COPY build.gradle.kts ./
@@ -39,7 +37,5 @@ WORKDIR /app
 COPY --from=build /app/build/libs/*.jar app.jar
 
 # JARファイルを実行
-# 注意: Railwayは自動的にポートを割り当て、$PORT環境変数に設定します
-# application.ymlで ${PORT:8080} を使用することで、Railwayのポートを自動的に使用します
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]

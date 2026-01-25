@@ -2,40 +2,15 @@ import { mockApiService, shouldUseMockApi } from './mockApi';
 
 // 環境変数が設定されている場合はそれを使用、そうでない場合は実行時に判断
 // 開発環境（localhost:3000）ではバックエンドの絶対URLを使用
-// Railway環境では、バックエンドのURLを推測または環境変数から取得
 const getApiBaseUrl = () => {
-  // 環境変数が明示的に設定されている場合はそれを使用
   if (process.env.REACT_APP_API_URL) {
     return process.env.REACT_APP_API_URL;
   }
-  
   // 実行時にホスト名を確認
   const hostname = window.location.hostname;
-  const protocol = window.location.protocol;
-  
-  // ローカル開発環境
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return 'http://localhost:8080/api';
   }
-  
-  // Railway環境（*.up.railway.app または *.railway.app）
-  // フロントエンドとバックエンドが同じドメインの場合は相対パスを使用
-  // 異なるドメインの場合は、バックエンドのURLを推測
-  if (hostname.includes('railway.app') || hostname.includes('railway')) {
-    // Railwayでは、フロントエンドとバックエンドが別サービスとしてデプロイされる場合が多い
-    // 環境変数が設定されていない場合は、同じドメインを想定して相対パスを使用
-    // ただし、バックエンドのURLが異なる場合は、REACT_APP_API_URLを設定する必要がある
-    console.warn(
-      '⚠️ REACT_APP_API_URLが設定されていません。' +
-      'Railwayでフロントエンドとバックエンドが別サービスとしてデプロイされている場合、' +
-      'フロントエンドサービスの環境変数にREACT_APP_API_URLを設定してください。' +
-      '例: REACT_APP_API_URL=https://internet-banking-production-b084.up.railway.app/api'
-    );
-    // デフォルトでは相対パスを使用（同じドメインの場合）
-    return '/api';
-  }
-  
-  // その他の環境（相対パスを使用）
   return '/api';
 };
 
@@ -118,26 +93,6 @@ export const apiService = {
       });
 
       console.log('Register response status:', response.status);
-      console.log('Register response Content-Type:', response.headers.get('Content-Type'));
-
-      // レスポンスがHTMLの場合（JSONではない場合）を検出
-      const contentType = response.headers.get('Content-Type') || '';
-      if (!contentType.includes('application/json')) {
-        const text = await response.text();
-        console.error('Register API returned non-JSON response:', text.substring(0, 200));
-        
-        // HTMLレスポンスの場合、環境変数が設定されていない可能性が高い
-        if (text.trim().startsWith('<!doctype') || text.trim().startsWith('<!DOCTYPE') || text.includes('<html')) {
-          throw new Error(
-            'APIエンドポイントに接続できません。' +
-            'Railway Dashboardでフロントエンドサービスの環境変数に' +
-            'REACT_APP_API_URLを設定してください。' +
-            '詳細はRAILWAY_FRONTEND_API_URL_FIX.mdを参照してください。'
-          );
-        }
-        
-        throw new Error(`サーバーが予期しない形式のレスポンスを返しました。ステータス: ${response.status}`);
-      }
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: '登録に失敗しました' }));
@@ -148,19 +103,8 @@ export const apiService = {
       const result = await response.json();
       console.log('Register success:', result);
       return result;
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error registering user:', error);
-      // 既に適切なエラーメッセージが設定されている場合はそのまま
-      if (error.message && !error.message.includes('APIエンドポイント')) {
-        // SyntaxErrorの場合、より分かりやすいメッセージに変換
-        if (error.name === 'SyntaxError' || error.message.includes('Unexpected token')) {
-          throw new Error(
-            'APIエンドポイントに接続できません。' +
-            'Railway Dashboardでフロントエンドサービスの環境変数に' +
-            'REACT_APP_API_URL=https://internet-banking-production-b084.up.railway.app/api を設定してください。'
-          );
-        }
-      }
       throw error;
     }
   },
@@ -180,26 +124,6 @@ export const apiService = {
       });
 
       console.log('Login response status:', response.status);
-      console.log('Login response Content-Type:', response.headers.get('Content-Type'));
-
-      // レスポンスがHTMLの場合（JSONではない場合）を検出
-      const contentType = response.headers.get('Content-Type') || '';
-      if (!contentType.includes('application/json')) {
-        const text = await response.text();
-        console.error('Login API returned non-JSON response:', text.substring(0, 200));
-        
-        // HTMLレスポンスの場合、環境変数が設定されていない可能性が高い
-        if (text.trim().startsWith('<!doctype') || text.trim().startsWith('<!DOCTYPE') || text.includes('<html')) {
-          throw new Error(
-            'APIエンドポイントに接続できません。' +
-            'Railway Dashboardでフロントエンドサービスの環境変数に' +
-            'REACT_APP_API_URLを設定してください。' +
-            '詳細はRAILWAY_FRONTEND_API_URL_FIX.mdを参照してください。'
-          );
-        }
-        
-        throw new Error(`サーバーが予期しない形式のレスポンスを返しました。ステータス: ${response.status}`);
-      }
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'ログインに失敗しました' }));
@@ -210,19 +134,8 @@ export const apiService = {
       const result = await response.json();
       console.log('Login success:', result);
       return result;
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error logging in:', error);
-      // 既に適切なエラーメッセージが設定されている場合はそのまま
-      if (error.message && !error.message.includes('APIエンドポイント')) {
-        // SyntaxErrorの場合、より分かりやすいメッセージに変換
-        if (error.name === 'SyntaxError' || error.message.includes('Unexpected token')) {
-          throw new Error(
-            'APIエンドポイントに接続できません。' +
-            'Railway Dashboardでフロントエンドサービスの環境変数に' +
-            'REACT_APP_API_URL=https://internet-banking-production-b084.up.railway.app/api を設定してください。'
-          );
-        }
-      }
       throw error;
     }
   },

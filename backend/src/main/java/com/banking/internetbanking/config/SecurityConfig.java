@@ -80,14 +80,12 @@ public class SecurityConfig {
                     .collect(java.util.stream.Collectors.toList())
             );
         } else {
-            // デフォルト: ローカル開発環境とRailwayの一般的なドメイン
+            // デフォルト: ローカル開発環境
             // 注意: ワイルドカードパターンはSpring Securityでは動作しないため、
             // 環境変数CORS_ALLOWED_ORIGINSで具体的なドメインを指定することを推奨
             configuration.setAllowedOrigins(Arrays.asList(
                     "http://localhost:3000",
-                    "http://localhost:8080",
-                    "https://internet-banking-production-b084.up.railway.app",
-                    "https://internet-banking-frontend-production.up.railway.app"));
+                    "http://localhost:8080"));
         }
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
