@@ -24,40 +24,13 @@ public class CorsConfig implements WebMvcConfigurer {
     /**
      * CORSフィルターを明示的に登録
      * Spring Securityのフィルターチェーンの前に実行されるように設定します。
+     * SecurityConfigのcorsConfigurationSource()を使用します。
      */
     @Bean
-    public FilterRegistrationBean<CorsFilter> corsFilterRegistration() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        
-        // すべてのオリジンを許可
-        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
-        
-        // すべてのメソッドを許可
-        configuration.setAllowedMethods(Arrays.asList(
-                "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"));
-        
-        // すべてのヘッダーを許可（明示的に指定）
-        configuration.setAllowedHeaders(Arrays.asList(
-                "Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin",
-                "Access-Control-Request-Method", "Access-Control-Request-Headers",
-                "X-CSRF-TOKEN", "Cache-Control", "Pragma", "If-Modified-Since",
-                "If-None-Match", "ETag", "Last-Modified"));
-        
-        // 認証情報を許可しない
-        configuration.setAllowCredentials(false);
-        
-        // プリフライトリクエストのキャッシュ時間
-        configuration.setMaxAge(3600L);
-        
-        // 公開するヘッダー
-        configuration.setExposedHeaders(Arrays.asList(
-                "Content-Type", "Authorization", "X-Requested-With"));
-        
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        
+    public FilterRegistrationBean<CorsFilter> corsFilterRegistration(
+            org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource) {
         FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(
-                new CorsFilter(source));
+                new CorsFilter(corsConfigurationSource));
         bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
         
         return bean;
