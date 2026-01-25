@@ -19,7 +19,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/investments")
-// CORS設定はSecurityConfigで一元管理するため、@CrossOriginは削除
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class InvestmentController {
 
     private final InvestmentService investmentService;

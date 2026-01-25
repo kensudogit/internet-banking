@@ -14,7 +14,7 @@ import java.util.Map;
  * アプリケーションのバージョン情報やエンドポイント一覧を返します。
  */
 @RestController
-// CORS設定はSecurityConfigで一元管理するため、@CrossOriginは削除
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class InfoController {
 
     /**
