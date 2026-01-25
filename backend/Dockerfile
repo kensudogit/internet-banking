@@ -7,15 +7,19 @@ COPY gradle ./gradle
 COPY gradlew ./
 COPY gradlew.bat ./
 
-# gradlewに実行権限を付与
-RUN chmod +x ./gradlew
+# gradlewの改行コードを修正（CRLF → LF）し、実行権限を付与
+RUN sed -i 's/\r$//' ./gradlew && \
+    chmod +x ./gradlew && \
+    ls -la ./gradlew
 
 # build.gradle.ktsをコピー
 COPY build.gradle.kts ./
 COPY settings.gradle.kts* ./
 
 # 依存関係をダウンロード（キャッシュを活用）
-RUN ./gradlew dependencies --no-daemon || true
+# gradlewが正しく動作するか確認してから実行
+RUN ./gradlew --version && \
+    ./gradlew dependencies --no-daemon || true
 
 # ソースコードをコピー
 COPY src ./src
