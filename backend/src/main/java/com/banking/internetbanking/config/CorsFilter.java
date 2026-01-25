@@ -30,33 +30,33 @@ public class CorsFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
 
-        // すべてのオリジンを許可
-        String origin = request.getHeader("Origin");
-        if (origin != null) {
-            response.setHeader("Access-Control-Allow-Origin", origin);
-        } else {
-            response.setHeader("Access-Control-Allow-Origin", "*");
-        }
+        // すべてのオリジンを許可（ワイルドカードを使用）
+        response.setHeader("Access-Control-Allow-Origin", "*");
 
         // すべてのメソッドを許可
         response.setHeader("Access-Control-Allow-Methods", 
                 "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD");
 
-        // すべてのヘッダーを許可
-        response.setHeader("Access-Control-Allow-Headers", 
-                "Authorization, Content-Type, X-Requested-With, Accept, Origin, " +
-                "Access-Control-Request-Method, Access-Control-Request-Headers, " +
-                "X-CSRF-TOKEN, Cache-Control, Pragma");
+        // すべてのヘッダーを許可（明示的に指定）
+        String requestedHeaders = request.getHeader("Access-Control-Request-Headers");
+        if (requestedHeaders != null && !requestedHeaders.isEmpty()) {
+            response.setHeader("Access-Control-Allow-Headers", requestedHeaders);
+        } else {
+            response.setHeader("Access-Control-Allow-Headers", 
+                    "Authorization, Content-Type, X-Requested-With, Accept, Origin, " +
+                    "Access-Control-Request-Method, Access-Control-Request-Headers, " +
+                    "X-CSRF-TOKEN, Cache-Control, Pragma, If-Modified-Since, " +
+                    "If-None-Match, ETag, Last-Modified");
+        }
 
-        // 認証情報を許可しない（すべてのオリジンを許可する場合）
+        // 認証情報を許可しない（ワイルドカードを使用する場合）
         response.setHeader("Access-Control-Allow-Credentials", "false");
 
         // プリフライトリクエストのキャッシュ時間
         response.setHeader("Access-Control-Max-Age", "3600");
 
         // 公開するヘッダー
-        response.setHeader("Access-Control-Expose-Headers", 
-                "Content-Type, Authorization, X-Requested-With");
+        response.setHeader("Access-Control-Expose-Headers", "*");
 
         // OPTIONSリクエスト（プリフライト）の場合は、ここで処理を終了
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
