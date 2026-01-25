@@ -104,6 +104,8 @@ public class SecurityConfig {
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.OK)))
                 // すべてのリクエストを許可（認証不要）
                 .authorizeHttpRequests(authz -> authz
+                        // OPTIONSリクエスト（プリフライト）を最優先で許可
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().permitAll());
 
         return http.build();

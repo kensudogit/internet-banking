@@ -1,8 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { apiService } from '../services/api';
 
 const Register: React.FC = () => {
+  const navigate = useNavigate();
+  
+  // 認証処理を無効化：常にDashboardにリダイレクト
+  useEffect(() => {
+    navigate('/dashboard', { replace: true });
+  }, [navigate]);
+
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -14,7 +21,6 @@ const Register: React.FC = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -65,8 +71,8 @@ const Register: React.FC = () => {
 
       // 登録成功
       setError('');
-      alert('登録が完了しました。ログインページに移動します。');
-      navigate('/login');
+      alert('登録が完了しました。ダッシュボードに移動します。');
+      navigate('/dashboard');
     } catch (err: any) {
       console.error('Registration error:', err);
       console.error('Error details:', {
@@ -89,13 +95,14 @@ const Register: React.FC = () => {
             新規アカウント登録
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            または{' '}
+            {/* 認証処理を無効化：ログインリンクを非表示 */}
+            {/* または{' '}
             <Link
               to="/login"
               className="font-medium text-primary-600 hover:text-primary-500"
             >
               既存のアカウントでログイン
-            </Link>
+            </Link> */}
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>

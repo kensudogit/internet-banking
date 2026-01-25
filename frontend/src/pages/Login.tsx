@@ -1,14 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
 const Login: React.FC = () => {
+  const navigate = useNavigate();
+  
+  // 認証処理を無効化：常にDashboardにリダイレクト
+  useEffect(() => {
+    navigate('/dashboard', { replace: true });
+  }, [navigate]);
+
   const [formData, setFormData] = useState({
     username: '',
     password: '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
