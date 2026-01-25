@@ -77,7 +77,7 @@ public class SecurityConfig {
 
     /**
      * セキュリティフィルターチェーンの設定
-     * CSRF無効化、セッション管理、認可設定を行います。
+     * 認証処理を完全に無効化し、すべてのリクエストを許可します。
      * CORS設定はcorsConfigurationSource()で定義された設定を使用します。
      * 
      * @param http HttpSecurityオブジェクト
@@ -89,14 +89,16 @@ public class SecurityConfig {
         http
                 // CORS設定を有効化
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // CSRFを無効化
                 .csrf(csrf -> csrf.disable())
+                // セッション管理を無効化（STATELESS）
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // 認証を完全に無効化
+                .httpBasic(basic -> basic.disable())
+                .formLogin(form -> form.disable())
+                .logout(logout -> logout.disable())
+                // すべてのリクエストを許可（認証不要）
                 .authorizeHttpRequests(authz -> authz
-                        // OPTIONSリクエスト（プリフライト）を明示的に許可
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/").permitAll()
-                        .requestMatchers("/error").permitAll()
-                        .requestMatchers("/api/**").permitAll()
                         .anyRequest().permitAll());
 
         return http.build();
