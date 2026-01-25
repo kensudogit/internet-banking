@@ -14,8 +14,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/auth")
-// CORS設定はSecurityConfigで一元管理するため、@CrossOriginは削除
-// RailwayのフロントエンドドメインはSecurityConfigのCORS設定で許可されます
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class AuthController {
 
     private final UserService userService;
