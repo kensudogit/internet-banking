@@ -2,6 +2,7 @@ package com.banking.internetbanking.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -13,6 +14,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * セキュリティ設定クラス
@@ -70,28 +73,38 @@ public class SecurityConfig {
 
         // 環境変数から許可するオリジンを取得（カンマ区切り）
         String allowedOrigins = System.getenv("CORS_ALLOWED_ORIGINS");
+        System.out.println("=== CORS設定確認 ===");
+        System.out.println("CORS_ALLOWED_ORIGINS環境変数: " + (allowedOrigins != null ? allowedOrigins : "未設定"));
+        
         if (allowedOrigins != null && !allowedOrigins.isEmpty()) {
             // カンマ区切りのオリジンをリストに変換（前後の空白を削除）
-            configuration.setAllowedOrigins(
-                Arrays.asList(allowedOrigins.split(","))
-                    .stream()
-                    .map(String::trim)
-                    .filter(s -> !s.isEmpty())
-                    .collect(java.util.stream.Collectors.toList())
-            );
+            List<String> origins = Arrays.asList(allowedOrigins.split(","))
+                .stream()
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toList());
+            
+            configuration.setAllowedOrigins(origins);
+            System.out.println("許可するオリジン: " + origins);
         } else {
-            // デフォルト: ローカル開発環境
-            // 注意: ワイルドカードパターンはSpring Securityでは動作しないため、
-            // 環境変数CORS_ALLOWED_ORIGINSで具体的なドメインを指定することを推奨
-            configuration.setAllowedOrigins(Arrays.asList(
+            // デフォルト: ローカル開発環境とRailwayのフロントエンドURL
+            List<String> defaultOrigins = Arrays.asList(
                     "http://localhost:3000",
-                    "http://localhost:8080"));
+                    "http://localhost:8080",
+                    "https://internet-banking-front-production.up.railway.app",
+                    "https://internet-banking-frontend-production.up.railway.app");
+            configuration.setAllowedOrigins(defaultOrigins);
+            System.out.println("デフォルトオリジンを使用: " + defaultOrigins);
         }
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
+        
+        System.out.println("許可するメソッド: " + configuration.getAllowedMethods());
+        System.out.println("許可するヘッダー: " + configuration.getAllowedHeaders());
+        System.out.println("===================");
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

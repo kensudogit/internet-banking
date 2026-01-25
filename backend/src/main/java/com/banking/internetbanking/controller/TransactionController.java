@@ -19,7 +19,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/transactions")
-@CrossOrigin(origins = "http://localhost:3000")
+// CORS設定はSecurityConfigで一元管理するため、@CrossOriginは削除
 public class TransactionController {
 
     private final TransactionService transactionService;

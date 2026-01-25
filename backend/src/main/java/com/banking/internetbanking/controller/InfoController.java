@@ -1,7 +1,6 @@
 package com.banking.internetbanking.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,7 +14,7 @@ import java.util.Map;
  * アプリケーションのバージョン情報やエンドポイント一覧を返します。
  */
 @RestController
-@CrossOrigin(origins = { "http://localhost:3000", "http://localhost:8080" })
+// CORS設定はSecurityConfigで一元管理するため、@CrossOriginは削除
 public class InfoController {
 
     /**

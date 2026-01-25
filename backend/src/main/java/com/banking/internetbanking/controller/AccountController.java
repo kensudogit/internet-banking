@@ -18,7 +18,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/accounts")
-@CrossOrigin(origins = "http://localhost:3000")
+// CORS設定はSecurityConfigで一元管理するため、@CrossOriginは削除
 public class AccountController {
 
     private final AccountService accountService;
