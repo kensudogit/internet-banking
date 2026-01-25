@@ -76,47 +76,23 @@ public class SecurityConfig {
     @Bean
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
-        // 環境変数から許可するオリジンを取得（カンマ区切り）
-        String allowedOrigins = System.getenv("CORS_ALLOWED_ORIGINS");
-        System.out.println("=== CORS設定確認 ===");
-        System.out.println("CORS_ALLOWED_ORIGINS環境変数: " + (allowedOrigins != null ? allowedOrigins : "未設定"));
         
-        if (allowedOrigins != null && !allowedOrigins.isEmpty()) {
-            // カンマ区切りのオリジンをリストに変換（前後の空白を削除）
-            List<String> origins = Arrays.asList(allowedOrigins.split(","))
-                .stream()
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .collect(Collectors.toList());
-            
-            configuration.setAllowedOrigins(origins);
-            System.out.println("許可するオリジン: " + origins);
-        } else {
-            // デフォルト: ローカル開発環境とRailwayのフロントエンドURL
-            List<String> defaultOrigins = Arrays.asList(
-                    "http://localhost:3000",
-                    "http://localhost:8080",
-                    "https://internet-banking-front-production.up.railway.app",
-                    "https://internet-banking-frontend-production.up.railway.app");
-            configuration.setAllowedOrigins(defaultOrigins);
-            System.out.println("デフォルトオリジンを使用: " + defaultOrigins);
-        }
-
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        // setAllowedHeaderPatternsを使用してすべてのヘッダーを許可（setAllowCredentials(true)と組み合わせ可能）
-        configuration.setAllowedHeaderPatterns(Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
+        // CORS設定を簡素化: すべてのオリジンを許可（開発/テスト用）
+        // 注意: 本番環境では特定のオリジンのみを許可することを推奨
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        // allowCredentialsをfalseに設定（すべてのオリジンを許可する場合）
+        configuration.setAllowCredentials(false);
         configuration.setMaxAge(3600L);
         
-        // デバッグ: 設定内容を確認
-        System.out.println("=== Spring Security CORS設定 ===");
-        System.out.println("  Allowed Origins: " + configuration.getAllowedOrigins());
+        System.out.println("=== CORS設定（簡素化版）===");
+        System.out.println("  Allowed Origin Patterns: * (すべてのオリジンを許可)");
         System.out.println("  Allowed Methods: " + configuration.getAllowedMethods());
-        System.out.println("  Allowed Header Patterns: " + configuration.getAllowedHeaderPatterns());
-        System.out.println("  Allow Credentials: " + configuration.getAllowCredentials());
+        System.out.println("  Allowed Headers: * (すべてのヘッダーを許可)");
+        System.out.println("  Allow Credentials: false");
         System.out.println("  Max Age: " + configuration.getMaxAge());
-        System.out.println("=================================");
+        System.out.println("===========================");
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
