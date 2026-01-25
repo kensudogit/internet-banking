@@ -50,10 +50,13 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 // CORS設定: UrlBasedCorsConfigurationSourceがBeanとして存在する場合、自動的に使用されます
+                // CORSは認証フィルターの前に処理される必要があります
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
+                        // OPTIONSリクエスト（preflight）を明示的に許可
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/").permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/**").permitAll() // 開発環境ではすべてのAPIを許可
@@ -101,12 +104,30 @@ public class SecurityConfig {
         }
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
+        // setAllowedHeadersに"*"を設定すると、setAllowCredentials(true)と組み合わせた場合に問題が発生します
+        // 代わりに、setAllowedHeaderPatternsを使用してすべてのヘッダーを許可します
+        configuration.setAllowedHeaderPatterns(Arrays.asList("*"));
+        // 一般的なCORSヘッダーも明示的に許可
+        configuration.setAllowedHeaders(Arrays.asList(
+                "Authorization",
+                "Content-Type",
+                "X-Requested-With",
+                "Accept",
+                "Origin",
+                "Access-Control-Request-Method",
+                "Access-Control-Request-Headers"
+        ));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
         
-        System.out.println("許可するメソッド: " + configuration.getAllowedMethods());
-        System.out.println("許可するヘッダー: " + configuration.getAllowedHeaders());
+        // デバッグ: 設定内容を確認
+        System.out.println("CORS設定詳細:");
+        System.out.println("  Allowed Origins: " + configuration.getAllowedOrigins());
+        System.out.println("  Allowed Methods: " + configuration.getAllowedMethods());
+        System.out.println("  Allowed Headers: " + configuration.getAllowedHeaders());
+        System.out.println("  Allowed Header Patterns: " + configuration.getAllowedHeaderPatterns());
+        System.out.println("  Allow Credentials: " + configuration.getAllowCredentials());
+        System.out.println("  Max Age: " + configuration.getMaxAge());
         System.out.println("===================");
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
