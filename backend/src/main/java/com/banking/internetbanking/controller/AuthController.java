@@ -15,7 +15,8 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*", maxAge = 3600)
+// CORS設定はSecurityConfigで一元管理するため、@CrossOriginは削除
+// RailwayのフロントエンドドメインはSecurityConfigのCORS設定で許可されます
 public class AuthController {
 
     private final UserService userService;
@@ -27,14 +28,6 @@ public class AuthController {
      */
     public AuthController(UserService userService) {
         this.userService = userService;
-    }
-
-    /**
-     * OPTIONSリクエスト（プリフライト）を処理
-     */
-    @RequestMapping(value = "/**", method = RequestMethod.OPTIONS)
-    public ResponseEntity<?> handleOptions() {
-        return ResponseEntity.ok().build();
     }
 
     /**

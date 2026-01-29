@@ -42,13 +42,29 @@ public class SecurityConfig {
     /**
      * CORS設定ソースのBean定義
      * Spring Securityで使用するCORS設定を提供します。
+     * 環境変数CORS_ALLOWED_ORIGINSから許可するオリジンを読み込みます。
      */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // すべてのオリジンを許可
-        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+        // 環境変数から許可するオリジンを取得
+        String allowedOriginsEnv = System.getenv("CORS_ALLOWED_ORIGINS");
+        if (allowedOriginsEnv != null && !allowedOriginsEnv.isEmpty()) {
+            // カンマ区切りで分割し、前後の空白を削除
+            String[] origins = Arrays.stream(allowedOriginsEnv.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .toArray(String[]::new);
+            configuration.setAllowedOriginPatterns(Arrays.asList(origins));
+            System.out.println("=== CORS設定（環境変数から）===");
+            System.out.println("  Allowed Origin Patterns: " + Arrays.toString(origins));
+        } else {
+            // 環境変数が設定されていない場合、すべてのオリジンを許可（開発用）
+            configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+            System.out.println("=== CORS設定（デフォルト：すべて許可）===");
+            System.out.println("  Allowed Origin Patterns: * (すべてのオリジンを許可)");
+        }
         
         // すべてのメソッドを許可
         configuration.setAllowedMethods(Arrays.asList(
@@ -59,17 +75,23 @@ public class SecurityConfig {
                 "Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin",
                 "Access-Control-Request-Method", "Access-Control-Request-Headers",
                 "X-CSRF-TOKEN", "Cache-Control", "Pragma", "If-Modified-Since",
-                "If-None-Match", "ETag", "Last-Modified"));
+                "If-None-Match", "ETag", "Last-Modified", "X-Auth-Token"));
         
-        // 認証情報を許可しない
+        // 認証情報を許可しない（すべてのオリジンを許可する場合）
         configuration.setAllowCredentials(false);
         
-        // プリフライトリクエストのキャッシュ時間
+        // プリフライトリクエストのキャッシュ時間（1時間）
         configuration.setMaxAge(3600L);
         
         // 公開するヘッダー
         configuration.setExposedHeaders(Arrays.asList(
-                "Content-Type", "Authorization", "X-Requested-With"));
+                "Content-Type", "Authorization", "X-Requested-With", "Access-Control-Allow-Origin"));
+        
+        System.out.println("  Allowed Methods: " + configuration.getAllowedMethods());
+        System.out.println("  Allowed Headers: " + configuration.getAllowedHeaders());
+        System.out.println("  Allow Credentials: " + configuration.getAllowCredentials());
+        System.out.println("  Max Age: " + configuration.getMaxAge());
+        System.out.println("===========================");
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
@@ -106,6 +128,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authz -> authz
                         // OPTIONSリクエスト（プリフライト）を最優先で許可
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // すべてのリクエストを許可
                         .anyRequest().permitAll());
 
         return http.build();
