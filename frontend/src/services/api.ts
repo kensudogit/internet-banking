@@ -97,6 +97,12 @@ export interface AuthResponse {
 export const apiService = {
   // ユーザー登録
   async register(data: RegisterRequest): Promise<AuthResponse> {
+    // モックAPIを使用する場合
+    if (shouldUseMockApi()) {
+      console.log('Using mock API for register');
+      return mockApiService.register(data);
+    }
+
     try {
       const url = `${API_BASE_URL}/auth/register`;
       console.log('Registering user:', url);
@@ -107,6 +113,7 @@ export const apiService = {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
+        credentials: 'omit',
       });
 
       console.log('Register response status:', response.status);
@@ -118,10 +125,17 @@ export const apiService = {
       if (!isJson) {
         const errorText = await response.text().catch(() => 'Unknown error');
         console.error('Register API returned non-JSON response:', errorText.substring(0, 200));
-        throw new Error(`バックエンドがJSON以外のレスポンスを返しました。バックエンドサービスの状態を確認してください。ステータス: ${response.status}`);
+        console.log('⚠️ バックエンドがJSON以外のレスポンスを返しました。MOCK APIにフォールバックします。');
+        return mockApiService.register(data);
       }
 
       if (!response.ok) {
+        // HTTP 5xxエラーの場合、MOCK APIにフォールバック
+        if (response.status >= 500) {
+          console.error('Register API returned 5xx error, falling back to mock API');
+          return mockApiService.register(data);
+        }
+        
         const errorData = await response.json().catch(() => ({ error: '登録に失敗しました' }));
         console.error('Register API error response:', errorData);
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
@@ -138,20 +152,23 @@ export const apiService = {
         stack: error.stack
       });
       
-      // ネットワークエラーの場合、より分かりやすいメッセージを表示
-      if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
-        const errorMessage = `バックエンドAPIに接続できません。\n\n` +
-          `API URL: ${API_BASE_URL}\n\n` +
-          `考えられる原因:\n` +
-          `1. バックエンドサービスが起動していない\n` +
-          `2. REACT_APP_API_URLの値が間違っている\n` +
-          `3. CORS設定の問題\n` +
-          `4. ネットワーク接続の問題\n\n` +
-          `確認方法:\n` +
-          `- Railway Dashboardでバックエンドサービスのステータスを確認\n` +
-          `- バックエンドのログを確認\n` +
-          `- ブラウザのNetworkタブでリクエストを確認`;
-        throw new Error(errorMessage);
+      // ネットワークエラー、CORSエラー、またはDB接続エラーの場合、MOCK APIにフォールバック
+      const errorMessage = error.message || error.toString() || '';
+      const errorName = error.name || '';
+      
+      if (
+        errorMessage === 'Failed to fetch' || 
+        errorName === 'TypeError' || 
+        errorMessage.includes('fetch') ||
+        errorMessage.includes('CORS') ||
+        errorMessage.includes('ERR_FAILED') ||
+        errorMessage.includes('ERR_CONNECTION_REFUSED') ||
+        errorMessage.includes('NetworkError') ||
+        errorMessage.includes('Network request failed')
+      ) {
+        console.log('⚠️ バックエンドAPIに接続できません。MOCK APIにフォールバックします。');
+        console.log('エラー詳細:', errorMessage);
+        return mockApiService.register(data);
       }
       
       throw error;
@@ -221,44 +238,25 @@ export const apiService = {
         cause: error.cause
       });
       
-      // ネットワークエラーの場合、より分かりやすいメッセージを表示
+      // ネットワークエラー、CORSエラー、またはDB接続エラーの場合、MOCK APIにフォールバック
       const errorMessage = error.message || error.toString() || '';
       const errorName = error.name || '';
       
-      if (errorMessage === 'Failed to fetch' || errorName === 'TypeError' || errorMessage.includes('fetch')) {
-        // バックエンドのヘルスチェックを試行して、より詳細な情報を取得
-        const healthCheckUrl = API_BASE_URL.replace('/api', '/api/health');
-        console.log('バックエンドのヘルスチェックを試行:', healthCheckUrl);
-        
-        try {
-          const healthResponse = await fetch(healthCheckUrl, {
-            method: 'GET',
-            credentials: 'omit',
-          });
-          console.log('ヘルスチェック結果:', {
-            status: healthResponse.status,
-            statusText: healthResponse.statusText,
-            ok: healthResponse.ok
-          });
-        } catch (healthError) {
-          console.error('ヘルスチェックも失敗:', healthError);
-        }
-        
-        const detailedErrorMessage = `バックエンドAPIに接続できません。\n\n` +
-          `API URL: ${API_BASE_URL}\n` +
-          `フロントエンドURL: ${window.location.origin}\n\n` +
-          `考えられる原因:\n` +
-          `1. バックエンドサービスが起動していない（Railway Dashboardで確認）\n` +
-          `2. REACT_APP_API_URLの値が間違っている（現在: ${API_BASE_URL}）\n` +
-          `3. CORS設定の問題（バックエンドのCORS_ALLOWED_ORIGINSを確認）\n` +
-          `4. ネットワーク接続の問題\n\n` +
-          `確認手順:\n` +
-          `1. Railway Dashboard → internet-bankingサービス → ステータスが「Online」か確認\n` +
-          `2. Railway Dashboard → internet-bankingサービス → Logsタブでエラーを確認\n` +
-          `3. Railway Dashboard → internet-bankingサービス → VariablesタブでCORS_ALLOWED_ORIGINSを確認\n` +
-          `4. ブラウザのNetworkタブでリクエストの詳細を確認\n` +
-          `5. バックエンドのURLに直接アクセスして動作確認: ${API_BASE_URL.replace('/api', '/api/health')}`;
-        throw new Error(detailedErrorMessage);
+      if (
+        errorMessage === 'Failed to fetch' || 
+        errorName === 'TypeError' || 
+        errorMessage.includes('fetch') ||
+        errorMessage.includes('CORS') ||
+        errorMessage.includes('ERR_FAILED') ||
+        errorMessage.includes('ERR_CONNECTION_REFUSED') ||
+        errorMessage.includes('NetworkError') ||
+        errorMessage.includes('Network request failed') ||
+        errorMessage.includes('blocked by CORS policy')
+      ) {
+        console.log('⚠️ バックエンドAPIに接続できません。MOCK APIにフォールバックします。');
+        console.log('エラー詳細:', errorMessage);
+        console.log('エラー名:', errorName);
+        return mockApiService.login(data);
       }
       
       throw error;

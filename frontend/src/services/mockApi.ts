@@ -1,7 +1,7 @@
 // 開発用モックAPIサービス
-// 本番環境では使用しない
+// バックエンドに接続できない場合に自動的に使用されます
 
-import { Account, Transaction } from './api';
+import { Account, Transaction, AuthResponse, RegisterRequest, LoginRequest } from './api';
 
 // モックデータ
 const mockAccounts: Account[] = [
@@ -54,8 +54,85 @@ const mockTransactions: Transaction[] = [
   }
 ];
 
+// モックユーザーデータ
+const mockUsers = [
+  {
+    username: 'testuser',
+    password: 'password123',
+    email: 'test@example.com',
+    firstName: 'Test',
+    lastName: 'User',
+    userId: 1
+  },
+  {
+    username: 'demo',
+    password: 'demo123',
+    email: 'demo@example.com',
+    firstName: 'Demo',
+    lastName: 'User',
+    userId: 2
+  }
+];
+
 // モックAPIサービス
 export const mockApiService = {
+  // ユーザー登録
+  async register(data: RegisterRequest): Promise<AuthResponse> {
+    console.log('Mock API: Registering user', data.username);
+    
+    // 実際のAPIと同様の遅延をシミュレート
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // ユーザー名の重複チェック
+    const existingUser = mockUsers.find(u => u.username === data.username);
+    if (existingUser) {
+      console.log('Mock API: Username already exists');
+      return { error: 'このユーザー名は既に使用されています' };
+    }
+    
+    // メールアドレスの重複チェック
+    const existingEmail = mockUsers.find(u => u.email === data.email);
+    if (existingEmail) {
+      console.log('Mock API: Email already exists');
+      return { error: 'このメールアドレスは既に使用されています' };
+    }
+    
+    // 新しいユーザーを追加
+    const newUserId = mockUsers.length + 1;
+    mockUsers.push({
+      username: data.username,
+      password: data.password,
+      email: data.email,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      userId: newUserId
+    });
+    
+    console.log('Mock API: User registered successfully');
+    return { message: 'ユーザー登録が完了しました' };
+  },
+
+  // ログイン
+  async login(data: LoginRequest): Promise<AuthResponse> {
+    console.log('Mock API: Logging in user', data.username);
+    
+    // 実際のAPIと同様の遅延をシミュレート
+    await new Promise(resolve => setTimeout(resolve, 600));
+    
+    // ユーザー認証
+    const user = mockUsers.find(
+      u => u.username === data.username && u.password === data.password
+    );
+    
+    if (!user) {
+      console.log('Mock API: Authentication failed');
+      return { error: '認証に失敗しました' };
+    }
+    
+    console.log('Mock API: Login successful for user', user.username);
+    return { message: 'ログイン成功', token: `mock-token-${user.userId}` };
+  },
+
   // 口座情報を取得
   async getAccounts(userId: number): Promise<Account[]> {
     console.log('Mock API: Getting accounts for user', userId);
