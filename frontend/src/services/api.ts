@@ -1,17 +1,23 @@
 import { mockApiService, shouldUseMockApi } from './mockApi';
 
 // 環境変数が設定されている場合はそれを使用、そうでない場合は実行時に判断
-// 開発環境（localhost:3000）ではバックエンドの絶対URLを使用
+// Railway本番環境では、REACT_APP_API_URLが設定されている必要がある
+// 開発環境では相対パス(/api)を使用してプロキシ経由でバックエンドに接続
 const getApiBaseUrl = () => {
+  // 環境変数が明示的に設定されている場合はそれを使用（Railway本番環境）
   if (process.env.REACT_APP_API_URL) {
     return process.env.REACT_APP_API_URL;
   }
-  // 実行時にホスト名を確認
+  // 開発環境では相対パスを使用（package.jsonのproxy設定によりlocalhost:8080にプロキシ）
+  // Railway本番環境では、REACT_APP_API_URLが設定されていない場合、エラーを表示
   const hostname = window.location.hostname;
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return 'http://localhost:8080/api';
+    return '/api'; // 開発環境では相対パスを使用
   }
-  return '/api';
+  // Railway本番環境でREACT_APP_API_URLが設定されていない場合
+  // エラーメッセージを表示（実際のエラーは各API呼び出しで処理される）
+  console.error('⚠️ REACT_APP_API_URLが設定されていません。Railway Dashboardで環境変数を設定してください。');
+  return '/api'; // フォールバック（エラーが発生する）
 };
 
 const API_BASE_URL = getApiBaseUrl();
@@ -20,6 +26,17 @@ const API_BASE_URL = getApiBaseUrl();
 console.log('API_BASE_URL:', API_BASE_URL);
 console.log('Environment:', process.env.REACT_APP_ENV || 'development');
 console.log('Should use mock API:', shouldUseMockApi());
+console.log('Current hostname:', window.location.hostname);
+console.log('Current origin:', window.location.origin);
+
+// Railway本番環境でREACT_APP_API_URLが設定されているか確認
+if (window.location.hostname.includes('railway.app') || window.location.hostname.includes('up.railway.app')) {
+  if (!process.env.REACT_APP_API_URL) {
+    console.error('⚠️ Railway本番環境でREACT_APP_API_URLが設定されていません！');
+  } else {
+    console.log('✅ REACT_APP_API_URLが設定されています:', process.env.REACT_APP_API_URL);
+  }
+}
 
 export interface Account {
   id: number;
@@ -93,6 +110,16 @@ export const apiService = {
       });
 
       console.log('Register response status:', response.status);
+      
+      // Content-Typeをチェックして、JSONでない場合はエラー
+      const contentType = response.headers.get('content-type');
+      const isJson = contentType && contentType.includes('application/json');
+      
+      if (!isJson) {
+        const errorText = await response.text().catch(() => 'Unknown error');
+        console.error('Register API returned non-JSON response:', errorText.substring(0, 200));
+        throw new Error(`バックエンドがJSON以外のレスポンスを返しました。バックエンドサービスの状態を確認してください。ステータス: ${response.status}`);
+      }
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: '登録に失敗しました' }));
@@ -103,17 +130,51 @@ export const apiService = {
       const result = await response.json();
       console.log('Register success:', result);
       return result;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error registering user:', error);
+      console.error('Error details:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack
+      });
+      
+      // ネットワークエラーの場合、より分かりやすいメッセージを表示
+      if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
+        const errorMessage = `バックエンドAPIに接続できません。\n\n` +
+          `API URL: ${API_BASE_URL}\n\n` +
+          `考えられる原因:\n` +
+          `1. バックエンドサービスが起動していない\n` +
+          `2. REACT_APP_API_URLの値が間違っている\n` +
+          `3. CORS設定の問題\n` +
+          `4. ネットワーク接続の問題\n\n` +
+          `確認方法:\n` +
+          `- Railway Dashboardでバックエンドサービスのステータスを確認\n` +
+          `- バックエンドのログを確認\n` +
+          `- ブラウザのNetworkタブでリクエストを確認`;
+        throw new Error(errorMessage);
+      }
+      
       throw error;
     }
   },
 
   // ログイン
   async login(data: LoginRequest): Promise<AuthResponse> {
+    // モックAPIを使用する場合
+    if (shouldUseMockApi()) {
+      console.log('Using mock API for login');
+      return mockApiService.login(data);
+    }
+
     try {
       const url = `${API_BASE_URL}/auth/login`;
       console.log('Logging in:', url);
+      console.log('Request details:', {
+        method: 'POST',
+        url: url,
+        origin: window.location.origin,
+        headers: { 'Content-Type': 'application/json' }
+      });
       
       const response = await fetch(url, {
         method: 'POST',
@@ -121,9 +182,26 @@ export const apiService = {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
+        // CORSエラーを確認するため、credentialsを明示的に設定
+        credentials: 'omit',
       });
 
       console.log('Login response status:', response.status);
+      console.log('Login response headers:', {
+        'content-type': response.headers.get('content-type'),
+        'access-control-allow-origin': response.headers.get('access-control-allow-origin'),
+        'access-control-allow-methods': response.headers.get('access-control-allow-methods'),
+      });
+      
+      // Content-Typeをチェックして、JSONでない場合はエラー
+      const contentType = response.headers.get('content-type');
+      const isJson = contentType && contentType.includes('application/json');
+      
+      if (!isJson) {
+        const errorText = await response.text().catch(() => 'Unknown error');
+        console.error('Login API returned non-JSON response:', errorText.substring(0, 200));
+        throw new Error(`バックエンドがJSON以外のレスポンスを返しました。バックエンドサービスの状態を確認してください。ステータス: ${response.status}`);
+      }
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'ログインに失敗しました' }));
@@ -134,8 +212,55 @@ export const apiService = {
       const result = await response.json();
       console.log('Login success:', result);
       return result;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error logging in:', error);
+      console.error('Error details:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack,
+        cause: error.cause
+      });
+      
+      // ネットワークエラーの場合、より分かりやすいメッセージを表示
+      const errorMessage = error.message || error.toString() || '';
+      const errorName = error.name || '';
+      
+      if (errorMessage === 'Failed to fetch' || errorName === 'TypeError' || errorMessage.includes('fetch')) {
+        // バックエンドのヘルスチェックを試行して、より詳細な情報を取得
+        const healthCheckUrl = API_BASE_URL.replace('/api', '/api/health');
+        console.log('バックエンドのヘルスチェックを試行:', healthCheckUrl);
+        
+        try {
+          const healthResponse = await fetch(healthCheckUrl, {
+            method: 'GET',
+            credentials: 'omit',
+          });
+          console.log('ヘルスチェック結果:', {
+            status: healthResponse.status,
+            statusText: healthResponse.statusText,
+            ok: healthResponse.ok
+          });
+        } catch (healthError) {
+          console.error('ヘルスチェックも失敗:', healthError);
+        }
+        
+        const detailedErrorMessage = `バックエンドAPIに接続できません。\n\n` +
+          `API URL: ${API_BASE_URL}\n` +
+          `フロントエンドURL: ${window.location.origin}\n\n` +
+          `考えられる原因:\n` +
+          `1. バックエンドサービスが起動していない（Railway Dashboardで確認）\n` +
+          `2. REACT_APP_API_URLの値が間違っている（現在: ${API_BASE_URL}）\n` +
+          `3. CORS設定の問題（バックエンドのCORS_ALLOWED_ORIGINSを確認）\n` +
+          `4. ネットワーク接続の問題\n\n` +
+          `確認手順:\n` +
+          `1. Railway Dashboard → internet-bankingサービス → ステータスが「Online」か確認\n` +
+          `2. Railway Dashboard → internet-bankingサービス → Logsタブでエラーを確認\n` +
+          `3. Railway Dashboard → internet-bankingサービス → VariablesタブでCORS_ALLOWED_ORIGINSを確認\n` +
+          `4. ブラウザのNetworkタブでリクエストの詳細を確認\n` +
+          `5. バックエンドのURLに直接アクセスして動作確認: ${API_BASE_URL.replace('/api', '/api/health')}`;
+        throw new Error(detailedErrorMessage);
+      }
+      
       throw error;
     }
   },
