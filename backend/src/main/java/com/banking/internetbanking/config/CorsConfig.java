@@ -42,14 +42,25 @@ public class CorsConfig implements WebMvcConfigurer {
      */
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOriginPatterns("*")
+        // 環境変数から許可するオリジンを取得
+        String allowedOriginsEnv = System.getenv("CORS_ALLOWED_ORIGINS");
+        
+        CorsRegistry.CorsRegistration corsRegistration = registry.addMapping("/**")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD")
-                .allowedHeaders("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin",
-                        "Access-Control-Request-Method", "Access-Control-Request-Headers",
-                        "X-CSRF-TOKEN", "Cache-Control", "Pragma", "If-Modified-Since",
-                        "If-None-Match", "ETag", "Last-Modified")
+                .allowedHeaders("*")
                 .allowCredentials(false)
                 .maxAge(3600);
+        
+        if (allowedOriginsEnv != null && !allowedOriginsEnv.isEmpty()) {
+            // 環境変数が設定されている場合、実際のオリジンを許可
+            String[] origins = Arrays.stream(allowedOriginsEnv.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .toArray(String[]::new);
+            corsRegistration.allowedOrigins(origins);
+        } else {
+            // 環境変数が設定されていない場合、すべてのオリジンを許可
+            corsRegistration.allowedOriginPatterns("*");
+        }
     }
 }
