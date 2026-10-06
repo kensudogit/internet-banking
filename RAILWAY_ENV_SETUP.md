@@ -9,7 +9,7 @@
 | `PGHOST` | `postgres.railway.internal` |
 | `PGPORT` | `5432` |
 | `PGUSER` | `postgres` |
-| `PGPASSWORD` | `xduqlioTiXIZrsMeMzdTJUEjILwtOKIY` |
+| `PGPASSWORD` | `${PGPASSWORD}` |
 | `PGDATABASE` | `railway` |
 
 **✅ 確認結果**: すべての値が正しい形式です。`postgres.railway.internal`はRailwayの内部DNS名で、同じプロジェクト内のサービス間で使用されます。
@@ -48,7 +48,7 @@
 - **Key**: `SPRING_DATASOURCE_PASSWORD`
 - **Value**: 
   ```
-  xduqlioTiXIZrsMeMzdTJUEjILwtOKIY
+  ${PGPASSWORD}
   ```
 
 ### ステップ3: その他の必須環境変数を確認
@@ -59,7 +59,7 @@
 
 - **Key**: `JWT_SECRET`
 - **Value**: 32文字以上のランダムな文字列（例: `your-very-long-and-secure-secret-key-minimum-32-characters`）
-- **注意**: まだ設定されていない場合は、強力な秘密鍵を生成して設定してください
+- **注意**: 実際の秘密値はリポジトリへ記載せず、Railway VariablesなどのSecret管理機能で設定してください
 
 #### `SPRING_SQL_INIT_MODE`（推奨）
 
@@ -91,7 +91,7 @@
 |--------|-----|
 | `SPRING_DATASOURCE_URL` | `jdbc:postgresql://postgres.railway.internal:5432/railway?connectTimeout=10&socketTimeout=30` |
 | `SPRING_DATASOURCE_USERNAME` | `postgres` |
-| `SPRING_DATASOURCE_PASSWORD` | `xduqlioTiXIZrsMeMzdTJUEjILwtOKIY` |
+| `SPRING_DATASOURCE_PASSWORD` | `${PGPASSWORD}` |
 | `JWT_SECRET` | （32文字以上の文字列） |
 | `SPRING_SQL_INIT_MODE` | `always` |
 | `CORS_ALLOWED_ORIGINS` | `https://*.railway.app` |
